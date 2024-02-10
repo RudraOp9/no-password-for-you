@@ -77,10 +77,7 @@ public class MainActivity extends AppCompatActivity {
         regeneratePass.setOnClickListener(v -> passText.setText(generateNewPass()));
 
 
-        customSetSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked)customSettings.setVisibility(View.VISIBLE);
-            else customSettings.setVisibility(View.GONE);
-        });
+
 
 
         String[] values = {"10","9","8","7","6","5","4","3","2","1"};
@@ -93,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         spinnerNumbers.setAdapter(adapter);
         spinnerSmallLetter.setAdapter(adapter);
         spinnerSpecialSym.setAdapter(adapter);
+
         spinnerNumbers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -143,6 +141,23 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
                 numberslen = 2;
                 updateTotalText();
+            }
+        });
+        customSetSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked){
+                customSettings.setVisibility(View.VISIBLE);
+                numberslen = Byte.parseByte((String) spinnerNumbers.getSelectedItem());
+                alphaCapLength = Byte.parseByte((String) spinnerCapLetter.getSelectedItem());
+                alphaSmallLength = Byte.parseByte((String) spinnerSmallLetter.getSelectedItem());
+                specialSymbol = Byte.parseByte((String) spinnerSpecialSym.getSelectedItem());
+            }
+            else{
+                customSettings.setVisibility(View.GONE);
+                alphaCapLength = 4;
+                specialSymbol = 2;
+                numberslen = 4;
+                alphaSmallLength = 6;
+                passLength = 16;
             }
         });
 
