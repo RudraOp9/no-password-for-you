@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">No password for you</string>
     <string name="desc_spinner_dropdown" />
+    <string name="generating_password">Generating Password....</string>
+    <string name="regenerate_password">Regenerate password</string>
+    <string name="custom_settings">Custom Settings</string>
+    <string name="password_length">Password length</string>
+    <string name="capital_letters">Capital letters</string>
+    <string name="small_letters">small letters</string>
+    <string name="special_symbols">Special Symbols</string>
+    <string name="numbers">Numbers</string>
 </resources>
