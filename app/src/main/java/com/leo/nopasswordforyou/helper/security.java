@@ -3,17 +3,22 @@ package com.leo.nopasswordforyou.helper;
 import android.os.Build;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 
@@ -24,6 +29,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 @RequiresApi(api = Build.VERSION_CODES.M)
@@ -36,6 +42,7 @@ public class security {
 
     Cipher cipher;
     KeyStore keyStore;
+    String alias = "NOPASSWORDFORYOUKEY";
     public security() {
 
         try {
@@ -53,31 +60,42 @@ public class security {
             cipher.init(Cipher.ENCRYPT_MODE, getKey());
             // new IvParameterSpec(cipher.getIV());
             encPass = new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
+            Log.d("tag","in encryptData try block ");
 
         } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+            Log.d("tag","in encryptData catch block");
             throw new RuntimeException(e);
         }
         return encPass;
     }
 
-    private SecretKey getKey() {
-        String alias = "NOPASSWORDFORYOUKEY";
+    public String decryptData(String pass) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+        cipher.init(Cipher.DECRYPT_MODE,getKey(),new IvParameterSpec(cipher.getIV()));
+        return new String(cipher.doFinal(Base64.decode(pass,Base64.DEFAULT)), StandardCharsets.UTF_8);
+    }
+
+    private Key getKey() {
+
         try {
             if(keyStore.containsAlias(alias)){
-               return (SecretKey) keyStore.getEntry(alias,null);
+                Log.d("tag","key store contains the key");
+               return (Key) keyStore.getEntry(alias,null);
             }else return newKey();
         } catch (KeyStoreException | UnrecoverableEntryException | NoSuchAlgorithmException e) {
+            Log.d("tag","in getKey catch block");
             throw new RuntimeException(e);
         }
 
     }
 
-    private SecretKey newKey() {
-        String keyText = "something";
+    private Key newKey() {
+        String keyText = "1234567890123456";
+        Log.d("tag","creating new key");
+        SecureRandom random = new SecureRandom();
+        byte[] EncryptionKey = new byte[32];
+        random.nextBytes(EncryptionKey);
         return new SecretKeySpec(keyText.getBytes(StandardCharsets.UTF_8),"AES");
     }
 
-    public void decryptData(String enPass){
 
-    }
 }

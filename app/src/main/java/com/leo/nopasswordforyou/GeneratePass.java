@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -17,16 +18,22 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.leo.nopasswordforyou.helper.security;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Collections;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 
 public class GeneratePass extends AppCompatActivity {
 
     AppCompatSpinner spinnerNumbers, spinnerSpecialSym, spinnerSmallLetter, spinnerCapLetter;
-    TextView passText, textView;
+    TextView passText, textView,test;
     Button  regeneratePass;
     ImageView copyPass;
     SwitchCompat customSetSwitch;
@@ -38,6 +45,7 @@ public class GeneratePass extends AppCompatActivity {
     byte numberslen = 4;
     byte alphaSmallLength = 6;
     byte passLength = 16;
+    security security = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +69,25 @@ public class GeneratePass extends AppCompatActivity {
 
         passText = findViewById(R.id.passText);
         passText.setText(generateNewPass());
+        test = findViewById(R.id.test);
         textView = findViewById(R.id.textView);
 
-        regeneratePass.setOnClickListener(v -> passText.setText(generateNewPass()));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            security = new security();
+        }
+
+        regeneratePass.setOnClickListener(v ->{
+            passText.setText(generateNewPass());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                try {
+                    test.setText(security.decryptData(test.getText().toString()));
+                } catch (InvalidKeyException | InvalidAlgorithmParameterException |
+                         IllegalBlockSizeException | BadPaddingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
 
 
@@ -151,9 +175,9 @@ public class GeneratePass extends AppCompatActivity {
 
         copyPass.setOnClickListener(v -> {
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                security security = new security();
-                passText.setText(security.encryptData(passText.getText().toString()));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                test.setText(security.encryptData(passText.getText().toString()));
             }
 
 
