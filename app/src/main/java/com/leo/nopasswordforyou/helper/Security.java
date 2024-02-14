@@ -9,7 +9,6 @@ import androidx.annotation.RequiresApi;
 
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -27,13 +26,12 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 @RequiresApi(api = Build.VERSION_CODES.M)
-public class security {
+public class Security {
 
     String ALGORITHM = KeyProperties.KEY_ALGORITHM_AES;
     String BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC;
@@ -43,7 +41,7 @@ public class security {
     Cipher cipher;
     KeyStore keyStore;
     String alias = "NOPASSWORDFORYOUKEY";
-    public security() {
+    public Security() {
 
         try {
             cipher = Cipher.getInstance(TRANSFORMATION);
@@ -57,8 +55,8 @@ public class security {
     public String encryptData(String pass) {
         String encPass;
         try {
+
             cipher.init(Cipher.ENCRYPT_MODE, getKey());
-            // new IvParameterSpec(cipher.getIV());
             encPass = new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
             Log.d("tag","in encryptData try block ");
 

@@ -18,10 +18,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.leo.nopasswordforyou.helper.security;
-
+import com.leo.nopasswordforyou.helper.Security;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
@@ -45,7 +42,11 @@ public class GeneratePass extends AppCompatActivity {
     byte numberslen = 4;
     byte alphaSmallLength = 6;
     byte passLength = 16;
-    security security = null;
+    Security security = null;
+    String[] capitalLetter = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+    String[] smallLetter = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y"};
+    String[] numbers = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+    String[] specials = {"#", "$", "&", "*", "@", "~", "?", "=", "/", ":"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +75,7 @@ public class GeneratePass extends AppCompatActivity {
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            security = new security();
+            security = new Security();
         }
 
         regeneratePass.setOnClickListener(v ->{
@@ -196,23 +197,19 @@ public class GeneratePass extends AppCompatActivity {
         int total = alphaCapLength + alphaSmallLength + specialSymbol + numberslen;
         String k = String.valueOf(total);
         textView.setText(k);
-        ;
     }
 
     private String generateNewPass() {
 
 
-        String[] capitalLetter = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
-        String[] smalLetter = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y"};
-        String[] numbers = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
-        String[] specials = {"#", "$", "&", "*", "@", "~", "?", "=", "/", ":"};
+
 
 
         ArrayList<String> password = new ArrayList<>(passLength);
 
 
         for (byte a = 0; a < alphaSmallLength; a++) {
-            password.add(smalLetter[(int) (Math.random() * 25)]);
+            password.add(smallLetter[(int) (Math.random() * 25)]);
         }
         for (byte d = 0; d < specialSymbol; d++) {
             password.add(specials[(int) (Math.random() * 9)]);
