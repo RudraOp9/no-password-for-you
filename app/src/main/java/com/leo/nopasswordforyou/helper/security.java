@@ -7,6 +7,7 @@ import android.util.Base64;
 import androidx.annotation.RequiresApi;
 
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 
@@ -14,6 +15,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
 
 
 import javax.crypto.BadPaddingException;
@@ -34,25 +36,28 @@ public class security {
 
     Cipher cipher;
     KeyStore keyStore;
-    security() {
+    public security() {
 
         try {
             cipher = Cipher.getInstance(TRANSFORMATION);
             keyStore = KeyStore.getInstance("AndroidKeyStore");
-        }catch (NoSuchPaddingException | NoSuchAlgorithmException | KeyStoreException e) {
+            keyStore.load(null);
+        }catch (NoSuchPaddingException | NoSuchAlgorithmException | KeyStoreException |
+                CertificateException | IOException e) {
             throw new RuntimeException(e);
         }
     }
-    public void encryptData(String pass){
+    public String encryptData(String pass) {
+        String encPass;
         try {
-            cipher.init(Cipher.ENCRYPT_MODE,getKey());
-           // new IvParameterSpec(cipher.getIV());
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                String encPass = new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
-            }
+            cipher.init(Cipher.ENCRYPT_MODE, getKey());
+            // new IvParameterSpec(cipher.getIV());
+            encPass = new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
+
         } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             throw new RuntimeException(e);
         }
+        return encPass;
     }
 
     private SecretKey getKey() {

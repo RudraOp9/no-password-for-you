@@ -18,6 +18,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.leo.nopasswordforyou.helper.security;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -148,6 +150,13 @@ public class GeneratePass extends AppCompatActivity {
         });
 
         copyPass.setOnClickListener(v -> {
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                security security = new security();
+                passText.setText(security.encryptData(passText.getText().toString()));
+            }
+
+
             ClipboardManager clipboard = (ClipboardManager) GeneratePass.this.getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Copied Text", passText.getText());
             clipboard.setPrimaryClip(clip);
