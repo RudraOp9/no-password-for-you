@@ -1,6 +1,9 @@
 package com.leo.nopasswordforyou.helper;
 
+import android.credentials.GetCredentialException;
 import android.os.Build;
+import android.security.KeyPairGeneratorSpec;
+import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import android.util.Log;
@@ -14,9 +17,13 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 
 import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
@@ -30,69 +37,83 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-@RequiresApi(api = Build.VERSION_CODES.M)
+import kotlin.jvm.Throws;
+
+
 public class Security {
 
-    String ALGORITHM = KeyProperties.KEY_ALGORITHM_AES;
-    String BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC;
-    String PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7;
-    String TRANSFORMATION = ALGORITHM + "/" + BLOCK_MODE + "/" + PADDING;
-
+    final String ALGORITHM = "RSA";
+    final String BLOCK_MODE = "CBC";
+    final String PADDING = "PKCS1Padding";
+    final String KEYSTORE = "AndroidKeyStore";
+    final String TRANSFORMATION = String.format("%S/%S/%S",ALGORITHM,BLOCK_MODE,PADDING) ;
     Cipher cipher;
     KeyStore keyStore;
-    String alias = "NOPASSWORDFORYOUKEY";
-    public Security() {
+    final String alias = "NOPASSWORDFORYOUKEY";
+    public Security() throws NoSuchPaddingException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
 
-        try {
+
             cipher = Cipher.getInstance(TRANSFORMATION);
-            keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore = KeyStore.getInstance(KEYSTORE);
             keyStore.load(null);
-        }catch (NoSuchPaddingException | NoSuchAlgorithmException | KeyStoreException |
-                CertificateException | IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    public String encryptData(String pass) {
-        String encPass;
-        try {
 
-            cipher.init(Cipher.ENCRYPT_MODE, getKey());
+    }
+    public String encryptData(String pass) throws InvalidAlgorithmParameterException, KeyStoreException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnrecoverableEntryException {
+        String encPass;
+
+            cipher.init(Cipher.ENCRYPT_MODE, getKey(Cipher.ENCRYPT_MODE));
             encPass = new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
             Log.d("tag","in encryptData try block ");
 
-        } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-            Log.d("tag","in encryptData catch block");
-            throw new RuntimeException(e);
-        }
+
         return encPass;
     }
 
-    public String decryptData(String pass) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-        cipher.init(Cipher.DECRYPT_MODE,getKey(),new IvParameterSpec(cipher.getIV()));
+    public String decryptData(String pass) throws InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, UnrecoverableEntryException {
+        cipher.init(Cipher.DECRYPT_MODE,getKey(Cipher.DECRYPT_MODE)
+                ,new IvParameterSpec(cipher.getIV()));
         return new String(cipher.doFinal(Base64.decode(pass,Base64.DEFAULT)), StandardCharsets.UTF_8);
     }
 
-    private Key getKey() {
+    private Key getKey(int mode) throws RuntimeException, KeyStoreException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, UnrecoverableEntryException {
 
-        try {
+        if (mode == Cipher.ENCRYPT_MODE){
             if(keyStore.containsAlias(alias)){
                 Log.d("tag","key store contains the key");
-               return (Key) keyStore.getEntry(alias,null);
+                return keyStore.getCertificate(alias).getPublicKey();
             }else return newKey();
-        } catch (KeyStoreException | UnrecoverableEntryException | NoSuchAlgorithmException e) {
-            Log.d("tag","in getKey catch block");
-            throw new RuntimeException(e);
+        }else{
+            if(keyStore.containsAlias(alias)){
+                Log.d("tag","key store contains the key");
+                return keyStore.getKey(alias,null);
+            }else {
+                throw new InvalidKeyException("No Key Found : Add Keys First");
+            }
         }
+
+
 
     }
 
-    private Key newKey() {
-        String keyText = "1234567890123456";
-        Log.d("tag","creating new key");
-        SecureRandom random = new SecureRandom();
-        byte[] EncryptionKey = new byte[32];
-        random.nextBytes(EncryptionKey);
-        return new SecretKeySpec(keyText.getBytes(StandardCharsets.UTF_8),"AES");
+    private Key newKey() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM,KEYSTORE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            KeyGenParameterSpec keyGenParameterSpec  = new KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                    .setUserAuthenticationRequired(true)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1).build();
+
+            keyPairGenerator.initialize(keyGenParameterSpec);
+
+        }else {
+            keyPairGenerator.initialize(2048);
+        }
+
+        KeyPair keyPair =  keyPairGenerator.generateKeyPair();
+      //  keyStore.
+        Key keyPublic = keyPair.getPublic();
+        Key keyPrivate =  keyPair.getPrivate();
+        return keyPublic ;
     }
 
 

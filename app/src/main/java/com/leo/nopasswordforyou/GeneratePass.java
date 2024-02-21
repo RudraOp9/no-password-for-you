@@ -18,14 +18,24 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import com.google.android.material.snackbar.Snackbar;
 import com.leo.nopasswordforyou.helper.Security;
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class GeneratePass extends AppCompatActivity {
 
@@ -75,7 +85,15 @@ public class GeneratePass extends AppCompatActivity {
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            security = new Security();
+            try {
+                security = new Security();
+            } catch (NoSuchPaddingException |
+                     NoSuchAlgorithmException |
+                     KeyStoreException |
+                     CertificateException |
+                     IOException e) {
+                Toast.makeText(this, "Something Went Wrong "+ e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
 
         regeneratePass.setOnClickListener(v ->{
@@ -84,11 +102,16 @@ public class GeneratePass extends AppCompatActivity {
                 try {
                     test.setText(security.decryptData(test.getText().toString()));
                 } catch (InvalidKeyException | InvalidAlgorithmParameterException |
-                         IllegalBlockSizeException | BadPaddingException e) {
-                    throw new RuntimeException(e);
+                         IllegalBlockSizeException | BadPaddingException |
+                         NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException |
+                         UnrecoverableEntryException e) {
+                    Snackbar.make(v, Objects.requireNonNull(e.getMessage()),Snackbar.LENGTH_SHORT).show();
                 }
             }
         });
+
+
+
 
 
 
@@ -176,9 +199,13 @@ public class GeneratePass extends AppCompatActivity {
 
         copyPass.setOnClickListener(v -> {
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
+            try {
                 test.setText(security.encryptData(passText.getText().toString()));
+            } catch (InvalidAlgorithmParameterException | KeyStoreException |
+                     NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException |
+                     IllegalBlockSizeException | BadPaddingException | UnrecoverableEntryException e) {
+                Snackbar.make(v, Objects.requireNonNull(e.getMessage()),Snackbar.LENGTH_SHORT).show();
             }
 
 
