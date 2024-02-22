@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -34,14 +35,17 @@ public class login_page extends AppCompatActivity {
         setContentView(R.layout.activity_login_page);
 
 
-        mAuth.addAuthStateListener(firebaseAuth -> {
-            mAuth.getCurrentUser();
-            if (mAuth.getCurrentUser() != null) {
-                startActivity(new Intent(this, ShowPass.class));
-                mAuth.removeAuthStateListener((FirebaseAuth.AuthStateListener) this);
-                finish();
-            }
+        mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                mAuth.getCurrentUser();
+                if (mAuth.getCurrentUser() != null) {
+                    startActivity(new Intent(login_page.this, ShowPass.class));
+                    mAuth.removeAuthStateListener(this);
 
+                    finish();
+                }
+            }
         });
 
         doSignUp = findViewById(R.id.doSignUp);

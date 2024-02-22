@@ -49,20 +49,7 @@ public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> 
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
      //   final PassAdapterData myListData = listData.get(position);
         holder.passTitle.setText(listData.get(position).getTitle());
-       /* holder.passParent.clicksetOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DocumentReference dbPass =  db.collection("Passwords").document(uid).collection("YourPass").document(listData.get(position).getId());
 
-
-                dbPass.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-
-                    }
-                })
-            }
-        });*/
         holder.passDesc.setText(listData.get(position).getDescription());
     }
 
@@ -97,7 +84,7 @@ public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> 
         @Override
         public void onClick(View v) {
             if (clickListner != null){
-                clickListner.onClick(v, getAdapterPosition());
+                clickListner.onClick(v, listData.get(getAdapterPosition()).getId());
             }
         }
     }

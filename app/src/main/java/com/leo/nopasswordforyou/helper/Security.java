@@ -11,6 +11,8 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -27,6 +29,7 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
+import java.util.Objects;
 
 
 import javax.crypto.BadPaddingException;
@@ -49,7 +52,7 @@ public class Security {
     final String TRANSFORMATION = String.format("%S/%S/%S",ALGORITHM,BLOCK_MODE,PADDING) ;
     Cipher cipher;
     KeyStore keyStore;
-    final String alias = "NOPASSWORDFORYOUKEY";
+    final String alias = "NOPASSWORDFORYOUKEY"+ Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     public Security() throws NoSuchPaddingException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
 
 
