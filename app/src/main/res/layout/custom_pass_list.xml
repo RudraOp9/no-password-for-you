@@ -2,6 +2,7 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/passParent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="30dp"
@@ -28,7 +29,7 @@
             android:fontFamily="@font/open_sans"
             android:padding="5dp"
             android:text="Title"
-            android:textSize="27sp"
+            android:textSize="26sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -40,7 +41,7 @@
             android:padding="5dp"
             android:text="Description"
             android:fontFamily="@font/open_sans"
-            android:textSize="20sp"
+            android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/passTitle" />
 
@@ -50,6 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginEnd="20dp"
+
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/icon_build_24" />

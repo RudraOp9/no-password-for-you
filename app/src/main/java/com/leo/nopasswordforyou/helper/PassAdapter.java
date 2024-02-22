@@ -8,15 +8,31 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+
+import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import com.leo.nopasswordforyou.R;
+
 
 import java.util.ArrayList;
 
 public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> {
-    private ArrayList<PassAdapterData> listData;
+    private  ArrayList<PassAdapterData> listData;
+    private String uid;
+    FirebaseFirestore db;
+    public ItemClickListner clickListner;
 
-    public PassAdapter(ArrayList<PassAdapterData> listData) {
+    public void setClickListener(ItemClickListner clickListener) {
+        this.clickListner = clickListener;
+    }
+
+
+    public PassAdapter(ArrayList<PassAdapterData> listData,String uid,FirebaseFirestore db) {
         this.listData = listData;
+        this.db = db;
+        this.uid = uid;
+
     }
 
 
@@ -25,17 +41,31 @@ public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> 
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater  = LayoutInflater.from(parent.getContext());
         View listItem = inflater.inflate(R.layout.custom_pass_list,parent, false);
-        MyViewHolder viewHolder = new MyViewHolder(listItem);
-        return viewHolder;
+        return new MyViewHolder(listItem);
 
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        final PassAdapterData myListData = listData.get(position);
+     //   final PassAdapterData myListData = listData.get(position);
         holder.passTitle.setText(listData.get(position).getTitle());
+       /* holder.passParent.clicksetOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DocumentReference dbPass =  db.collection("Passwords").document(uid).collection("YourPass").document(listData.get(position).getId());
+
+
+                dbPass.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                    }
+                })
+            }
+        });*/
         holder.passDesc.setText(listData.get(position).getDescription());
     }
+
 
 
 
@@ -48,19 +78,28 @@ public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> 
 
 
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView passTitle;
         public TextView passDesc;
+        public MaterialCardView passParent;
+
 
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             this.passTitle = itemView.findViewById(R.id.passTitle);
+            this.passParent = itemView.findViewById(R.id.passParent);
             this.passDesc = itemView.findViewById(R.id.passDesc);
+            itemView.setOnClickListener(this);
         }
 
 
-
+        @Override
+        public void onClick(View v) {
+            if (clickListner != null){
+                clickListner.onClick(v, getAdapterPosition());
+            }
+        }
     }
 
 }
