@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,78 +10,91 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout2"
         android:layout_width="match_parent"
-        android:padding="40dp"
-        android:layout_height="wrap_content">
-        <androidx.appcompat.widget.AppCompatImageView
+        android:layout_height="wrap_content"
+        android:padding="40dp">
 
-            android:id="@+id/appCompatImageView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:padding="10dp"
-
-            android:layout_marginEnd="30dp"
-            android:background="@drawable/img_back"
-            android:elevation="10dp"
-
-            android:src="@drawable/img_pass"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearanceOverlay="@style/roundedImageViewRounded" />
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/passText"
-            android:inputType="textVisiblePassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:layout_marginStart="50dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="50dp"
+            android:gravity="center"
+            android:inputType="textVisiblePassword"
             android:padding="10dp"
             android:text="@string/generating_password"
             android:textColor="@color/black"
             android:textSize="25sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/appCompatImageView"
-            android:gravity="center"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:id="@+id/test"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/test"
             android:text="your test here"
             app:layout_constraintEnd_toEndOf="@+id/passText"
             app:layout_constraintStart_toStartOf="@+id/passText"
             app:layout_constraintTop_toBottomOf="@+id/passText" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/toolsLayout"
-            android:padding="10dp"
-            android:layout_marginTop="30dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/passText">
 
+           <!-- <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/k"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_back_2"
+                android:padding="15dp"
+                android:text="Save"
+                android:textSize="17sp" />-->
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/regeneratePass"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_back_2"
-            android:padding="15dp"
-            android:text="@string/regenerate_password"
-            android:textSize="17sp"
-             />
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/copyPass"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:background="@drawable/button_back_2"
-            android:padding="15dp"
-            app:srcCompat="@drawable/icon_copy_24" />
+           <!-- <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/regeneratePass"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_back_2"
+                android:padding="15dp"
+
+                android:text="regenerate"
+                android:textSize="17sp" />-->
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/saveToCloud"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/button_back_2"
+                android:padding="15dp"
+                android:contentDescription="Save To Cloud"
+                app:srcCompat="@drawable/icon_save_24" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/regeneratePass"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/button_back_2"
+                android:padding="15dp"
+                app:srcCompat="@drawable/icon_regenerate_24" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/copyPass"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/button_back_2"
+                android:padding="15dp"
+                app:srcCompat="@drawable/icon_copy_24" />
         </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -106,12 +118,12 @@
             android:id="@+id/customSettings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="10dp"
-            android:visibility="gone"
-            android:padding="20dp"
             android:orientation="vertical"
+            android:padding="20dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/appCompatTextView">

@@ -1,4 +1,5 @@
 package com.leo.nopasswordforyou;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.appcompat.widget.SwitchCompat;
@@ -41,8 +42,8 @@ public class GeneratePass extends AppCompatActivity {
 
     AppCompatSpinner spinnerNumbers, spinnerSpecialSym, spinnerSmallLetter, spinnerCapLetter;
     TextView passText, textView,test;
-    Button  regeneratePass;
-    ImageView copyPass;
+
+    ImageView copyPass, regeneratePass,saveToCloud;
     SwitchCompat customSetSwitch;
     LinearLayout customSettings;
     ConstraintLayout  layout2;
@@ -84,29 +85,25 @@ public class GeneratePass extends AppCompatActivity {
         textView = findViewById(R.id.textView);
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            try {
-                security = new Security(this);
-            } catch (NoSuchPaddingException |
-                     NoSuchAlgorithmException |
-                     KeyStoreException |
-                     CertificateException |
-                     IOException e) {
-                Toast.makeText(this, "Something Went Wrong "+ e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-            }
+        try {
+            security = new Security(this);
+        } catch (NoSuchPaddingException |
+                 NoSuchAlgorithmException |
+                 KeyStoreException |
+                 CertificateException |
+                 IOException e) {
+            Toast.makeText(this, "Something Went Wrong " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
         }
 
         regeneratePass.setOnClickListener(v ->{
             passText.setText(generateNewPass());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                try {
-                    test.setText(security.decryptData(test.getText().toString()));
-                } catch (InvalidKeyException | InvalidAlgorithmParameterException |
-                         IllegalBlockSizeException | BadPaddingException |
-                         NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException |
-                         UnrecoverableEntryException | InvalidKeySpecException e) {
-                    Snackbar.make(v, Objects.requireNonNull(e.getMessage()),Snackbar.LENGTH_INDEFINITE).show();
-                }
+            try {
+                test.setText(security.decryptData(test.getText().toString()));
+            } catch (InvalidKeyException | InvalidAlgorithmParameterException |
+                     IllegalBlockSizeException | BadPaddingException |
+                     NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException |
+                     UnrecoverableEntryException | InvalidKeySpecException e) {
+                Snackbar.make(v, Objects.requireNonNull(e.getMessage()), 3000).show();
             }
         });
 
@@ -252,9 +249,9 @@ public class GeneratePass extends AppCompatActivity {
 
         Collections.shuffle(password);
 
-        String pass = "";
-        for (String a : password) pass += a;
-        return pass;
+        StringBuilder pass = new StringBuilder();
+        for (String a : password) pass.append(a);
+        return pass.toString();
 
     }
 }
