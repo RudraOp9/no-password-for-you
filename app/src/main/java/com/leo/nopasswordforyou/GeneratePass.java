@@ -1,5 +1,4 @@
 package com.leo.nopasswordforyou;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.appcompat.widget.SwitchCompat;
@@ -29,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
@@ -86,7 +86,7 @@ public class GeneratePass extends AppCompatActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             try {
-                security = new Security();
+                security = new Security(this);
             } catch (NoSuchPaddingException |
                      NoSuchAlgorithmException |
                      KeyStoreException |
@@ -104,8 +104,8 @@ public class GeneratePass extends AppCompatActivity {
                 } catch (InvalidKeyException | InvalidAlgorithmParameterException |
                          IllegalBlockSizeException | BadPaddingException |
                          NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException |
-                         UnrecoverableEntryException e) {
-                    Snackbar.make(v, Objects.requireNonNull(e.getMessage()),Snackbar.LENGTH_SHORT).show();
+                         UnrecoverableEntryException | InvalidKeySpecException e) {
+                    Snackbar.make(v, Objects.requireNonNull(e.getMessage()),Snackbar.LENGTH_INDEFINITE).show();
                 }
             }
         });
@@ -204,7 +204,7 @@ public class GeneratePass extends AppCompatActivity {
                 test.setText(security.encryptData(passText.getText().toString()));
             } catch (InvalidAlgorithmParameterException | KeyStoreException |
                      NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException |
-                     IllegalBlockSizeException | BadPaddingException | UnrecoverableEntryException e) {
+                     IllegalBlockSizeException | BadPaddingException |InvalidKeySpecException| UnrecoverableEntryException e) {
                 Snackbar.make(v, Objects.requireNonNull(e.getMessage()),Snackbar.LENGTH_SHORT).show();
             }
 

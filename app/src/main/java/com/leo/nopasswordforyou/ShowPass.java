@@ -39,6 +39,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
 import javax.crypto.BadPaddingException;
@@ -124,12 +125,12 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
             String ToDecode = (String )documentSnapshot.get("pass");
             String decodedData = "No Key Added";
             try {
-                Security security = new Security();
+                Security security = new Security(this);
                 decodedData= security.decryptData(ToDecode);
             } catch (NoSuchPaddingException | NoSuchAlgorithmException | KeyStoreException |
                      CertificateException | IOException | InvalidAlgorithmParameterException |
-                     IllegalBlockSizeException | UnrecoverableEntryException |
-                     BadPaddingException | NoSuchProviderException | InvalidKeyException e) {
+                     IllegalBlockSizeException | UnrecoverableEntryException | BadPaddingException |
+                     NoSuchProviderException | InvalidKeyException | InvalidKeySpecException e) {
                 Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
