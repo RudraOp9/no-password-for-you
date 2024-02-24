@@ -1,8 +1,7 @@
 package com.leo.nopasswordforyou.helper;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
+
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
@@ -15,24 +14,19 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPair;
+
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
+
 import java.security.UnrecoverableEntryException;
-import java.security.cert.Certificate;
+
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
+
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Date;
+
 import java.util.Objects;
 
 import javax.crypto.BadPaddingException;
@@ -40,7 +34,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import javax.crypto.spec.IvParameterSpec;
 
 
 public class Security {
@@ -95,7 +88,7 @@ public class Security {
             NoSuchAlgorithmException,
             NoSuchProviderException,
             InvalidKeyException,
-            UnrecoverableEntryException, InvalidKeySpecException {
+            UnrecoverableEntryException {
 
         if (mode == Cipher.ENCRYPT_MODE) {
             if (keyStore.containsAlias(alias)) {
