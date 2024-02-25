@@ -18,12 +18,12 @@
 
 <h1>🛣️ Roadmap for No password for you</h1>
 
-- Allowing users to customize Password.✅
-- Add feature to secure password on cloud.❌
-- Add themes. ❌
-- Migrate to kotlin.❌
-- Adding security to app.✅❌
-- Upload it to Google Play Store. ❌
+- Allowing users to customize Password.✅✅✅
+- Add feature to secure password on cloud.✅✅❌ (Testing needed)
+- Add themes. ❌❌❌
+- Migrate to kotlin.❌❌❌
+- Adding security to app.✅✅❌
+- Upload it to Google Play Store. ❌❌❌
 - And most importantly, learn more about it ! ✅
 
 ---
