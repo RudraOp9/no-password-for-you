@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -139,28 +140,32 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
             }
 
             Log.d("tag", decodedData);
-            /*AlertDialog alertDialog ;
+            AlertDialog alertDialog1;
             String finalDecodedData = decodedData;
-            alertDialog = new MaterialAlertDialogBuilder(ShowPass.this)
-                    .setTitle("Your PassWord")
-                    .setMessage(decodedData)
-                    .create();
-            alertDialog.setButton(0, "Copy", new DialogInterface.OnClickListener() {
+
+            alertDialog1 = new MaterialAlertDialogBuilder(this).setView(R.layout.custom_show_pass).create();
+            alertDialog1.setCanceledOnTouchOutside(false);
+            alertDialog1.setCancelable(false);
+            alertDialog1.show();
+
+            MaterialTextView passShowCustom = alertDialog1.findViewById(R.id.passShowCustom);
+
+          /*  alertDialog.setButton(0, "Copy", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     copy(finalDecodedData);
                     alertDialog.dismiss();
                 }
-            });
-            alertDialog.setButton(1, "Close", new DialogInterface.OnClickListener() {
+            });*/
+            /*alertDialog.setButton(1, "Close", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     alertDialog.dismiss();
                 }
-            });
-            alertDialog.setCanceledOnTouchOutside(false);
-            alertDialog.setCancelable(false);
-            alertDialog.show();*/
+            });*/
+            alertDialog1.setCanceledOnTouchOutside(false);
+            alertDialog1.setCancelable(false);
+            alertDialog1.show();
         }).addOnFailureListener(e -> {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         });
