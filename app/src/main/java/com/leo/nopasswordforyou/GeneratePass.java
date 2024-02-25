@@ -1,5 +1,6 @@
 package com.leo.nopasswordforyou;
 
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
@@ -10,25 +11,25 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.res.XmlResourceParser;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
-import android.os.Build;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
+
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.leo.nopasswordforyou.helper.NewPass;
 import com.leo.nopasswordforyou.helper.Security;
 
@@ -41,10 +42,11 @@ import java.security.NoSuchProviderException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.Collections;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Vector;
+
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -103,7 +105,7 @@ public class GeneratePass extends AppCompatActivity {
                  KeyStoreException |
                  CertificateException |
                  IOException e) {
-            Toast.makeText(this, "Something Went Wrong " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Something Went Wrong : " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
         regeneratePass.setOnClickListener(v ->{
@@ -124,7 +126,7 @@ public class GeneratePass extends AppCompatActivity {
             alertDialog.setCanceledOnTouchOutside(false);
             alertDialog.setCancelable(false);
             AppCompatEditText passTitleCustom, passUserIdCustom, passDescCustom;
-            FloatingActionButton passDoneCustom, passDoneCustom2;
+            FloatingActionButton passDoneCustom, exitButtonCustom;
 
 
             alertDialog.show();
@@ -132,9 +134,19 @@ public class GeneratePass extends AppCompatActivity {
             passUserIdCustom = alertDialog.findViewById(R.id.passUserIdCustom);
             passDescCustom = alertDialog.findViewById(R.id.passDescCustom);
             passDoneCustom = alertDialog.findViewById(R.id.passDoneCustom);
+            exitButtonCustom = alertDialog.findViewById(R.id.exitButtonCustom);
+
+            if (exitButtonCustom != null) {
+                exitButtonCustom.setOnClickListener(v12 -> alertDialog.dismiss());
+            } else {
+                Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                alertDialog.dismiss();
+            }
+
+
             if (passDoneCustom != null) {
                 passDoneCustom.setOnClickListener(v1 -> {
-                    if ((Objects.requireNonNull(passTitleCustom != null ? passTitleCustom.getText() : "Something Went Wrong")).toString().isEmpty()) {
+                    if ((Objects.requireNonNull(Objects.requireNonNull(passTitleCustom).getText())).toString().isEmpty()) {
                         Snackbar.make(v1, "Empty title", 2000).show();
                     } else {
                         AlertDialog alertDialog1;
@@ -147,13 +159,90 @@ public class GeneratePass extends AppCompatActivity {
                             t.setText("secure uploading");
                         }
                         //   Snackbar.make(vie, "Uploading", 2000).show();
+                        String passTitle = passTitleCustom.getText().toString();
+                        String passDesc = "empty";
+                        String passUserId = "empty";
+                        if (passUserIdCustom != null) {
+                            passUserId = Objects.requireNonNull(passUserIdCustom.getText()).toString();
+                        }
+                        if (passDescCustom != null) {
+                            passDesc = Objects.requireNonNull(passDescCustom.getText()).toString();
+                        }
+
                         alertDialog.dismiss();
+                        String encPass = "";
+                        try {
+                            encPass = security.encryptData(passText.getText().toString());
+                        } catch (InvalidAlgorithmParameterException | KeyStoreException |
+                                 NoSuchAlgorithmException | NoSuchProviderException |
+                                 InvalidKeyException |
+                                 IllegalBlockSizeException | BadPaddingException |
+                                 InvalidKeySpecException | UnrecoverableEntryException e) {
+                            Snackbar.make(v, Objects.requireNonNull(e.getMessage()), Snackbar.LENGTH_SHORT).show();
+                            alertDialog1.dismiss();
+                            return;
+                        }
+
+                        if (encPass.equals("")) {
+                            Toast.makeText(this, "Error : Contact Support", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        FirebaseAuth auth = FirebaseAuth.getInstance();
+                        if (auth.getCurrentUser() != null) {
+                            String id = String.valueOf(System.currentTimeMillis());
+                            CollectionReference dbPass =
+                                    db.collection("PasswordManager")
+                                            .document(auth.getCurrentUser().getUid())
+                                            .collection("YourPass");
+
+                            Map<String, String> data = new HashMap<>();
+                            data.put("Title", passTitle);
+                            data.put("Desc", passDesc);
+                            data.put("id", id + passTitle);
+                            String finalEncPass = encPass;
+                            dbPass.add(data).addOnSuccessListener(documentReference -> {
+                                data.clear();
+                                data.put("pass", finalEncPass);
+                                db.collection("Passwords")
+                                        .document(auth.getCurrentUser().getUid())
+                                        .collection("YourPass").document(id + passTitle).set(data).addOnSuccessListener(unused -> {
+                                            Toast.makeText(GeneratePass.this, "Successfully completed", Toast.LENGTH_SHORT).show();
+                                            alertDialog1.dismiss();
+                                        });
+                            }).addOnFailureListener(e -> {
+                                Toast.makeText(GeneratePass.this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                                alertDialog1.dismiss();
+                            });
+
+
+                        } else {
+                            Toast.makeText(this, "Login First", Toast.LENGTH_SHORT).show();
+                            alertDialog1.dismiss();
+                        }
+
+
                     }
                 });
             } else {
                 Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
                 alertDialog.dismiss();
             }
+
+
+        });
+
+        copyPass.setOnClickListener(v -> {
+
+
+            ClipboardManager clipboard = (ClipboardManager) GeneratePass.this.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("Copied Text", passText.getText());
+            clipboard.setPrimaryClip(clip);
+            Handler handler = new Handler();
+            copyPass.setImageResource(R.drawable.icon_done_24);
+            //    copyPass.setBackgroundResource(R.drawable.icon_done_24);
+            handler.postDelayed(() -> copyPass.setImageResource(R.drawable.icon_copy_24), 1500);
+
 
         });
 
@@ -240,28 +329,7 @@ public class GeneratePass extends AppCompatActivity {
             }
         });
 
-        copyPass.setOnClickListener(v -> {
 
-
-            try {
-                test.setText(security.encryptData(passText.getText().toString()));
-            } catch (InvalidAlgorithmParameterException | KeyStoreException |
-                     NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException |
-                     IllegalBlockSizeException | BadPaddingException |InvalidKeySpecException| UnrecoverableEntryException e) {
-                Snackbar.make(v, Objects.requireNonNull(e.getMessage()),Snackbar.LENGTH_SHORT).show();
-            }
-
-
-            ClipboardManager clipboard = (ClipboardManager) GeneratePass.this.getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("Copied Text", passText.getText());
-            clipboard.setPrimaryClip(clip);
-            Handler handler = new Handler();
-            copyPass.setImageResource(R.drawable.icon_done_24);
-            //    copyPass.setBackgroundResource(R.drawable.icon_done_24);
-            handler.postDelayed(() -> copyPass.setImageResource(R.drawable.icon_copy_24), 1500);
-
-
-        });
     }
 
     private void updateTotalText() {

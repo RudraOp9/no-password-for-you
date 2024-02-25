@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -59,6 +60,7 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
         rvPasses = findViewById(R.id.rvPasses);
 
         ArrayList<PassAdapterData> passData = new ArrayList<>();
+        passData.add(new PassAdapterData("Title", "Desc", "id"));
 
       /*  passData.add(new PassAdapterData("Youtube","my youtube password","52"));
         passData.add(new PassAdapterData("Instagram","my Instagram password","2"));
@@ -90,20 +92,22 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
 
         db = FirebaseFirestore.getInstance();
         dbTitles = db.collection("PasswordManager").document(auth.getCurrentUser().getUid()).collection("YourPass");
-
+        PassAdapter passAdapter = new PassAdapter(passData, auth.getCurrentUser().getUid(), db);
+        passAdapter.setClickListener(this);
+        rvPasses.setAdapter(passAdapter);
+        rvPasses.setLayoutManager(new LinearLayoutManager(this));
         dbTitles.get().addOnSuccessListener(queryDocumentSnapshots -> {
 
             if (queryDocumentSnapshots != null) {
                 for (DocumentSnapshot a : queryDocumentSnapshots.getDocuments()) {
                     passData.add(new PassAdapterData((String) a.get("Title"), (String) a.get("Desc"), (String) a.get("id")));
                 }
+                passAdapter.notifyDataSetChanged();
+
             }
         }).addOnFailureListener(e -> Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_SHORT).show());
 
-        PassAdapter passAdapter = new PassAdapter(passData, auth.getCurrentUser().getUid(), db);
-        passAdapter.setClickListener(this);
-        rvPasses.setAdapter(passAdapter);
-        rvPasses.setLayoutManager(new LinearLayoutManager(this));
+
 
     }
 
@@ -126,7 +130,7 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
             String decodedData = "No Key Added";
             try {
                 Security security = new Security(this);
-                decodedData= security.decryptData(ToDecode);
+                decodedData = security.decryptData(ToDecode);
             } catch (NoSuchPaddingException | NoSuchAlgorithmException | KeyStoreException |
                      CertificateException | IOException | InvalidAlgorithmParameterException |
                      IllegalBlockSizeException | UnrecoverableEntryException | BadPaddingException |
@@ -134,8 +138,8 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                 Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
-
-            AlertDialog alertDialog ;
+            Log.d("tag", decodedData);
+            /*AlertDialog alertDialog ;
             String finalDecodedData = decodedData;
             alertDialog = new MaterialAlertDialogBuilder(ShowPass.this)
                     .setTitle("Your PassWord")
@@ -156,7 +160,7 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
             });
             alertDialog.setCanceledOnTouchOutside(false);
             alertDialog.setCancelable(false);
-            alertDialog.show();
+            alertDialog.show();*/
         }).addOnFailureListener(e -> {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         });

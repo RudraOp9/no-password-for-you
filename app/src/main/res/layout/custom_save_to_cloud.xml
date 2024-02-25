@@ -56,7 +56,7 @@
         app:layout_constraintTop_toBottomOf="@id/passUserIdCustom" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton2"
+        android:id="@+id/exitButtonCustom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
@@ -78,7 +78,7 @@
         android:contentDescription="TODO"
         android:src="@drawable/icon_done_24"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/floatingActionButton2"
+        app:layout_constraintEnd_toStartOf="@+id/exitButtonCustom"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
     <!--<button
