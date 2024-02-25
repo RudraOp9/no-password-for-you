@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/passTitleCustom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:drawableStart="@drawable/icon_title_24"
+        android:backgroundTint="#D69CFC"
+        android:gravity="center"
+        android:hint="Title (mandatory)"
+        android:padding="15dp"
+        android:singleLine="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/passUserIdCustom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:drawableStart="@drawable/icon_userid_24"
+        android:gravity="center"
+        android:backgroundTint="#D69CFC"
+        android:hint="UserId (optional)"
+        android:padding="15dp"
+        android:singleLine="true"
+        app:layout_constraintEnd_toEndOf="@+id/passTitleCustom"
+        app:layout_constraintStart_toStartOf="@+id/passTitleCustom"
+        app:layout_constraintTop_toBottomOf="@+id/passTitleCustom" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/passDescCustom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:drawableStart="@drawable/icon_description_24"
+        android:gravity="center"
+        android:hint="descrption (optional)"
+        android:backgroundTint="#D69CFC"
+        android:padding="15dp"
+        android:singleLine="true"
+        app:layout_constraintEnd_toEndOf="@+id/passUserIdCustom"
+        app:layout_constraintStart_toStartOf="@+id/passUserIdCustom"
+        app:layout_constraintTop_toBottomOf="@id/passUserIdCustom" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:contentDescription="TODO"
+        android:src="@drawable/icon_exit_to_app_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/passDoneCustom"
+        app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/passDoneCustom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:contentDescription="TODO"
+        android:src="@drawable/icon_done_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/floatingActionButton2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
+    <!--<button
+        android:id="@+id/saveToClou"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:contentDescription="Save To Cloud"
+        android:padding="15dp"
+        android:text="Done"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appCompatEditText2" />-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

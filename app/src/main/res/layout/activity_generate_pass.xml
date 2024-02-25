@@ -44,57 +44,47 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
+            android:padding="10dp"
             android:orientation="horizontal"
             android:gravity="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/passText">
 
-           <!-- <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/k"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_back_2"
-                android:padding="15dp"
-                android:text="Save"
-                android:textSize="17sp" />-->
 
-           <!-- <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/regeneratePass"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_back_2"
-                android:padding="15dp"
-
-                android:text="regenerate"
-                android:textSize="17sp" />-->
-
-            <androidx.appcompat.widget.AppCompatImageView
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/saveToCloud"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
-                android:background="@drawable/button_back_2"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
                 android:padding="15dp"
                 android:contentDescription="Save To Cloud"
                 app:srcCompat="@drawable/icon_save_24" />
-            <androidx.appcompat.widget.AppCompatImageView
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/regeneratePass"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
-                android:background="@drawable/button_back_2"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
                 android:padding="15dp"
-                app:srcCompat="@drawable/icon_regenerate_24" />
+                app:srcCompat="@drawable/icon_regenerate_24"
+                android:contentDescription="TODO" />
 
-            <androidx.appcompat.widget.AppCompatImageView
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/copyPass"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
-                android:background="@drawable/button_back_2"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+
                 android:padding="15dp"
-                app:srcCompat="@drawable/icon_copy_24" />
+                app:srcCompat="@drawable/icon_copy_24"
+                android:contentDescription="TODO" />
         </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatTextView
