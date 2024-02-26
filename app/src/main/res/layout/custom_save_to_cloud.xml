@@ -16,7 +16,7 @@
         android:drawableStart="@drawable/icon_title_24"
         android:backgroundTint="#D69CFC"
         android:gravity="center"
-        android:hint="Title (mandatory)"
+        android:hint="Title ( mandatory )"
         android:padding="15dp"
         android:singleLine="true"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,7 +32,7 @@
         android:drawableStart="@drawable/icon_userid_24"
         android:gravity="center"
         android:backgroundTint="#D69CFC"
-        android:hint="UserId (optional)"
+        android:hint="UserId (mandatory)"
         android:padding="15dp"
         android:singleLine="true"
         app:layout_constraintEnd_toEndOf="@+id/passTitleCustom"
@@ -55,6 +55,33 @@
         app:layout_constraintStart_toStartOf="@+id/passUserIdCustom"
         app:layout_constraintTop_toBottomOf="@id/passUserIdCustom" />
 
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/passSaveCustom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#D69CFC"
+        android:drawableStart="@drawable/icon_password_24"
+        android:gravity="center"
+        android:hint="Password"
+        android:padding="15dp"
+        android:singleLine="true"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="@+id/passDescCustom"
+        app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/newPassCustom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:backgroundTint="#E9DCFE"
+        android:text="New"
+        android:textColor="@color/black"
+        app:cornerRadius="5dp"
+        app:layout_constraintEnd_toEndOf="@+id/passDescCustom"
+        app:layout_constraintStart_toEndOf="@+id/passSaveCustom"
+        app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/exitButtonCustom"
         android:layout_width="wrap_content"
@@ -67,7 +94,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/passDoneCustom"
-        app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
+        app:layout_constraintTop_toBottomOf="@+id/passSaveCustom" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/passDoneCustom"
@@ -80,7 +107,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/exitButtonCustom"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
+        app:layout_constraintTop_toBottomOf="@+id/passSaveCustom" />
     <!--<button
         android:id="@+id/saveToClou"
         android:layout_width="wrap_content"

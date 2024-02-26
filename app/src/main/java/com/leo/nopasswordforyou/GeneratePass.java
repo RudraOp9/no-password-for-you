@@ -1,12 +1,12 @@
 package com.leo.nopasswordforyou;
 
 
-import androidx.annotation.NonNull;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatSpinner;
-import androidx.appcompat.widget.SwitchCompat;
+
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.ClipData;
@@ -24,13 +24,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.leo.nopasswordforyou.helper.NewPass;
 import com.leo.nopasswordforyou.helper.Security;
@@ -60,7 +62,7 @@ public class GeneratePass extends AppCompatActivity {
     TextView passText, textView, test;
 
     FloatingActionButton copyPass, regeneratePass, saveToCloud;
-    SwitchCompat customSetSwitch;
+    MaterialSwitch customSetSwitch;
     LinearLayout customSettings;
     ConstraintLayout layout2;
 
@@ -127,11 +129,23 @@ public class GeneratePass extends AppCompatActivity {
             alertDialog = new MaterialAlertDialogBuilder(this).setView(R.layout.custom_save_to_cloud).create();
             alertDialog.setCanceledOnTouchOutside(false);
             alertDialog.setCancelable(false);
-            AppCompatEditText passTitleCustom, passUserIdCustom, passDescCustom;
-            FloatingActionButton passDoneCustom, exitButtonCustom;
 
 
             alertDialog.show();
+            AppCompatEditText passTitleCustom, passUserIdCustom, passDescCustom, passSaveCustom;
+            FloatingActionButton passDoneCustom, exitButtonCustom;
+            MaterialButton newPassCustom;
+
+            newPassCustom = alertDialog.findViewById(R.id.newPassCustom);
+            passSaveCustom = alertDialog.findViewById(R.id.passSaveCustom);
+
+            if (passSaveCustom != null) {
+                passSaveCustom.setVisibility(View.GONE);
+            }
+            if (newPassCustom != null) {
+                newPassCustom.setVisibility(View.GONE);
+            }
+
             passTitleCustom = alertDialog.findViewById(R.id.passTitleCustom);
             passUserIdCustom = alertDialog.findViewById(R.id.passUserIdCustom);
             passDescCustom = alertDialog.findViewById(R.id.passDescCustom);
@@ -193,10 +207,10 @@ public class GeneratePass extends AppCompatActivity {
                         FirebaseAuth auth = FirebaseAuth.getInstance();
                         if (auth.getCurrentUser() != null) {
                             String id = String.valueOf(System.currentTimeMillis());
-                            CollectionReference dbPass =
+                            DocumentReference dbPass =
                                     db.collection("PasswordManager")
                                             .document(auth.getCurrentUser().getUid())
-                                            .collection("YourPass");
+                                            .collection("YourPass").document(id + passTitle);
 
                             Map<String, String> data = new HashMap<>();
                             data.put("Title", passTitle);
@@ -204,7 +218,7 @@ public class GeneratePass extends AppCompatActivity {
                             data.put("id", id + passTitle);
                             String finalEncPass = encPass;
                             String finalPassUserId = passUserId;
-                            dbPass.add(data).addOnSuccessListener(documentReference -> {
+                            dbPass.set(data).addOnSuccessListener(documentReference -> {
                                 data.clear();
                                 data.put("pass", finalEncPass);
                                 data.put("UserId", finalPassUserId);

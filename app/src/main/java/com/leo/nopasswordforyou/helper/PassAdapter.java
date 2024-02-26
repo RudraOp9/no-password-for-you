@@ -49,8 +49,8 @@ public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> 
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
      //   final PassAdapterData myListData = listData.get(position);
         holder.passTitle.setText(listData.get(position).getTitle());
-
         holder.passDesc.setText(listData.get(position).getDescription());
+
     }
 
 
@@ -84,7 +84,7 @@ public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> 
         @Override
         public void onClick(View v) {
             if (clickListner != null){
-                clickListner.onClick(v, listData.get(getAdapterPosition()).getId());
+                clickListner.onClick(v, listData.get(getAdapterPosition()).getId(), listData.get(getAdapterPosition()).getTitle(), listData.get(getAdapterPosition()).getDescription());
             }
         }
     }

@@ -6,16 +6,25 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/passTool"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="20dp"
+        android:layout_gravity="end"
+        app:srcCompat="@drawable/icon_build_24" />
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/passUserIdShowCustom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="30dp"
         android:layout_marginTop="5dp"
         android:textSize="17sp"
         android:text="your user id"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/materialTextView" />
+
+        />
 
     <LinearLayout
         android:layout_width="wrap_content"
