@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,7 +60,8 @@ import javax.crypto.NoSuchPaddingException;
 public class GeneratePass extends AppCompatActivity {
 
     AppCompatSpinner spinnerNumbers, spinnerSpecialSym, spinnerSmallLetter, spinnerCapLetter;
-    TextView passText, textView, test;
+    TextView passText, textView;
+    Button copyPassEnc;
 
     FloatingActionButton copyPass, regeneratePass, saveToCloud;
     MaterialSwitch customSetSwitch;
@@ -92,13 +94,15 @@ public class GeneratePass extends AppCompatActivity {
         spinnerSpecialSym = findViewById(R.id.spinnerSpecialSym);
         spinnerNumbers = findViewById(R.id.spinnerNumbers);
 
+        copyPassEnc = findViewById(R.id.copyPassEnc);
+
 
         regeneratePass = findViewById(R.id.regeneratePass);
         saveToCloud = findViewById(R.id.saveToCloud);
 
         passText = findViewById(R.id.passText);
         passText.setText(newPass.generateNewPass(alphaCapLength, specialSymbol, numberslen, alphaSmallLength, passLength));
-        test = findViewById(R.id.test);
+
         textView = findViewById(R.id.textView);
 
 
@@ -112,16 +116,34 @@ public class GeneratePass extends AppCompatActivity {
             Toast.makeText(this, "Something Went Wrong : " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
-        regeneratePass.setOnClickListener(v ->{
-            passText.setText(newPass.generateNewPass(alphaCapLength, specialSymbol, numberslen, alphaSmallLength, passLength));
+        copyPassEnc.setOnClickListener(v -> {
+            Toast.makeText(this, "This button is for this release only \n it will be removed in beta ++ releases", Toast.LENGTH_SHORT).show();
+            String copy = "Task Failed";
             try {
+                copy = security.encryptData(passText.getText().toString());
+            } catch (InvalidAlgorithmParameterException | KeyStoreException |
+                     NoSuchAlgorithmException | NoSuchProviderException |
+                     InvalidKeyException |
+                     IllegalBlockSizeException | BadPaddingException |
+                     InvalidKeySpecException | UnrecoverableEntryException e) {
+                Snackbar.make(v, Objects.requireNonNull(e.getMessage()), Snackbar.LENGTH_SHORT).show();
+                return;
+            }
+
+            ClipboardManager clipboard = (ClipboardManager) GeneratePass.this.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("Copied Text", copy);
+            clipboard.setPrimaryClip(clip);
+        });
+        regeneratePass.setOnClickListener(v -> {
+            passText.setText(newPass.generateNewPass(alphaCapLength, specialSymbol, numberslen, alphaSmallLength, passLength));
+      /*      try {
                 test.setText(security.decryptData(test.getText().toString()));
             } catch (InvalidKeyException | InvalidAlgorithmParameterException |
                      IllegalBlockSizeException | BadPaddingException |
                      NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException |
                      UnrecoverableEntryException | InvalidKeySpecException e) {
                 Snackbar.make(v, Objects.requireNonNull(e.getMessage()), 3000).show();
-            }
+            }*/
         });
 
         saveToCloud.setOnClickListener(v -> {
