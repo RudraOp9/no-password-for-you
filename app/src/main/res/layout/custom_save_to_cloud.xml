@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -45,10 +44,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
+        android:backgroundTint="#D69CFC"
         android:drawableStart="@drawable/icon_description_24"
         android:gravity="center"
         android:hint="descrption (optional)"
-        android:backgroundTint="#D69CFC"
         android:padding="15dp"
         android:singleLine="true"
         app:layout_constraintEnd_toEndOf="@+id/passUserIdCustom"
@@ -63,10 +62,12 @@
         android:drawableStart="@drawable/icon_password_24"
         android:gravity="center"
         android:hint="Password"
+        android:inputType="textPassword"
         android:padding="15dp"
         android:singleLine="true"
         android:visibility="visible"
-        app:layout_constraintStart_toStartOf="@+id/passDescCustom"
+        app:layout_constraintEnd_toStartOf="@+id/newPassCustom"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
 
     <com.google.android.material.button.MaterialButton
@@ -74,12 +75,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="32dp"
         android:backgroundTint="#E9DCFE"
         android:text="New"
         android:textColor="@color/black"
         app:cornerRadius="5dp"
-        app:layout_constraintEnd_toEndOf="@+id/passDescCustom"
-        app:layout_constraintStart_toEndOf="@+id/passSaveCustom"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

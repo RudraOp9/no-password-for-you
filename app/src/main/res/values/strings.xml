@@ -9,4 +9,5 @@
     <string name="small_letters">small letters</string>
     <string name="special_symbols">Special Symbols</string>
     <string name="numbers">Numbers</string>
+    <string name="lol">this is an alpha release of \'No password for you\' This version is not the final version of this app and it is solely made for debugging purpose only . \n You should not Enter any sensitive info while using this application or to test the application , as your data can be used for debugging purpose. \n If you have some problem regarding your data , contact me on my E-mail. \n Your contribution makes the open source more better , if you find any bug,crash , new features, secuirity leaks , or any other problem, you can submit it on Github issues or on my E-mail. \n the report must include your device info, steps to reproduce the error, Expected results, Actual result , Visual proof if possible (screenshot , recording , etc.),priority of error. \nContact me : Rudrapratapsinhchauhan1@gmail.com \nGithub: https://github.com/RudraOp9/no-password-for-you</string>
 </resources>
