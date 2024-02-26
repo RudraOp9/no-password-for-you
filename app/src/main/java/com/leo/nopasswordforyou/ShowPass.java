@@ -169,7 +169,8 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                     AlertDialog.Builder ad = new AlertDialog.Builder(ShowPass.this)
                             .setTitle("Alert !")
                             .setMessage("You are changing your password Fields.")
-                            .setCancelable(true).setPositiveButton("Update", (dialog, which) -> {
+                            .setCancelable(true)
+                            .setPositiveButton("Update", (dialog, which) -> {
 
                                 AlertDialog alertDialog2 = new MaterialAlertDialogBuilder(this).setView(R.layout.custom_save_to_cloud).create();
                                 alertDialog2.setCanceledOnTouchOutside(false);
@@ -208,7 +209,7 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                                     });
                                 }
 
-                                //TODO: MAKE CHANGES IN SHOW PASS.CLASS FOR NEW PASS CUSTOM.
+                                //: MAKE CHANGES IN SHOW PASS.CLASS FOR NEW PASS CUSTOM.
 
                                 if (exitButtonCustom != null) {
                                     exitButtonCustom.setOnClickListener(v12 -> alertDialog2.dismiss());
@@ -243,11 +244,10 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                                                     db.collection("PasswordManager")
                                                             .document(auth.getCurrentUser().getUid())
                                                             .collection("YourPass")
-                                                            .document(id + passTitleCustom.getText().toString());
+                                                            .document(id + Title);
                                             updatePassCloudSerial(data, dbPass2);
                                         }
                                         data.clear();
-                                        assert passSaveCustom != null;
                                         if (ToDecode != null && !ToDecode.equals(Objects.requireNonNull(passSaveCustom.getText()).toString())) {
                                             data.put("pass", passSaveCustom.getText().toString());
                                         }
@@ -264,10 +264,18 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                                     });
                                 }
 
-
                                 dialog.cancel();
 
-                            }).setNegativeButton("Delete", (dialog, which) -> {
+                            })
+                            .setNegativeButton("Delete", (dialog, which) -> {
+                                DocumentReference dbPass2 =
+                                        db.collection("PasswordManager")
+                                                .document(auth.getCurrentUser().getUid())
+                                                .collection("YourPass")
+                                                .document(id + Title);
+
+                                dbPass2.delete();
+                                dbPass.delete();
 
                                 dialog.cancel();
                             });

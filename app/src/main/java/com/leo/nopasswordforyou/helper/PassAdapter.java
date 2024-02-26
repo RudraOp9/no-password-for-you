@@ -18,8 +18,8 @@ import com.leo.nopasswordforyou.R;
 import java.util.ArrayList;
 
 public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> {
-    private  ArrayList<PassAdapterData> listData;
-    private String uid;
+    private final ArrayList<PassAdapterData> listData;
+    private final String uid;
     FirebaseFirestore db;
     public ItemClickListner clickListner;
 
@@ -28,7 +28,7 @@ public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> 
     }
 
 
-    public PassAdapter(ArrayList<PassAdapterData> listData,String uid,FirebaseFirestore db) {
+    public PassAdapter(ArrayList<PassAdapterData> listData, String uid, FirebaseFirestore db) {
         this.listData = listData;
         this.db = db;
         this.uid = uid;
