@@ -1,6 +1,7 @@
 package com.leo.nopasswordforyou;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
@@ -23,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -201,14 +203,19 @@ public class GeneratePass extends AppCompatActivity {
                             data.put("Desc", passDesc);
                             data.put("id", id + passTitle);
                             String finalEncPass = encPass;
+                            String finalPassUserId = passUserId;
                             dbPass.add(data).addOnSuccessListener(documentReference -> {
                                 data.clear();
                                 data.put("pass", finalEncPass);
+                                data.put("UserId", finalPassUserId);
                                 db.collection("Passwords")
                                         .document(auth.getCurrentUser().getUid())
                                         .collection("YourPass").document(id + passTitle).set(data).addOnSuccessListener(unused -> {
                                             Toast.makeText(GeneratePass.this, "Successfully completed", Toast.LENGTH_SHORT).show();
                                             alertDialog1.dismiss();
+                                        }).addOnFailureListener(e -> {
+                                            alertDialog1.dismiss();
+                                            Toast.makeText(GeneratePass.this, "Something went wrong", Toast.LENGTH_SHORT).show();
                                         });
                             }).addOnFailureListener(e -> {
                                 Toast.makeText(GeneratePass.this, "Something went wrong", Toast.LENGTH_SHORT).show();

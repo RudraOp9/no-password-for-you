@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import androidx.appcompat.app.AlertDialog;
@@ -21,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
@@ -61,16 +64,7 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
         rvPasses = findViewById(R.id.rvPasses);
 
         ArrayList<PassAdapterData> passData = new ArrayList<>();
-        passData.add(new PassAdapterData("Title", "Desc", "id"));
 
-      /*  passData.add(new PassAdapterData("Youtube","my youtube password","52"));
-        passData.add(new PassAdapterData("Instagram","my Instagram password","2"));
-        passData.add(new PassAdapterData("Facebook","my facebook password","5"));
-        passData.add(new PassAdapterData("github","my github password","6"));
-        passData.add(new PassAdapterData("whatsapp","my whatsapp password","12"));
-        passData.add(new PassAdapterData("test","my test password","63"));
-        passData.add(new PassAdapterData("hard time","my  password","1"));
-        passData.add(new PassAdapterData("password","my password","0"));*/
 
 
         auth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
@@ -127,7 +121,8 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                         .document(id);
 
         dbPass.get().addOnSuccessListener(documentSnapshot -> {
-            String ToDecode = (String )documentSnapshot.get("pass");
+            String ToDecode = (String) documentSnapshot.get("pass");
+            String UserId = (String) documentSnapshot.get("UserId");
             String decodedData = "No Key Added";
             try {
                 Security security = new Security(this);
@@ -136,36 +131,55 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                      CertificateException | IOException | InvalidAlgorithmParameterException |
                      IllegalBlockSizeException | UnrecoverableEntryException | BadPaddingException |
                      NoSuchProviderException | InvalidKeyException | InvalidKeySpecException e) {
-                Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                return;
             }
 
             Log.d("tag", decodedData);
             AlertDialog alertDialog1;
-            String finalDecodedData = decodedData;
 
             alertDialog1 = new MaterialAlertDialogBuilder(this).setView(R.layout.custom_show_pass).create();
             alertDialog1.setCanceledOnTouchOutside(false);
-            alertDialog1.setCancelable(false);
+            alertDialog1.setCancelable(true);
             alertDialog1.show();
 
             MaterialTextView passShowCustom = alertDialog1.findViewById(R.id.passShowCustom);
+            MaterialTextView passUserIdShowCustom = alertDialog1.findViewById(R.id.passUserIdShowCustom);
+            FloatingActionButton showPassEyeCustom = alertDialog1.findViewById(R.id.showPassEyeCustom);
+            MaterialButton copyPassCustom = alertDialog1.findViewById(R.id.copyPassCustom);
+            MaterialButton copyUserIdCustom = alertDialog1.findViewById(R.id.copyUserIdCustom);
+            if (passShowCustom != null) {
+                passShowCustom.setText(decodedData);
 
-          /*  alertDialog.setButton(0, "Copy", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+                if (showPassEyeCustom != null) {
+                    final boolean[] a = {true};
+                    showPassEyeCustom.setOnClickListener(v1 -> {
+                        if (a[0]) {
+                            passShowCustom.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                            a[0] = false;
+                        } else {
+                            a[0] = true;
+                            passShowCustom.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        }
+                    });
+                }
+            }
+
+            if (copyUserIdCustom != null) {
+                copyUserIdCustom.setOnClickListener(v12 -> {
+                    copy(UserId);
+                });
+            }
+            if (copyPassCustom != null) {
+                String finalDecodedData = decodedData;
+                copyPassCustom.setOnClickListener(v13 -> {
                     copy(finalDecodedData);
-                    alertDialog.dismiss();
-                }
-            });*/
-            /*alertDialog.setButton(1, "Close", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    alertDialog.dismiss();
-                }
-            });*/
-            alertDialog1.setCanceledOnTouchOutside(false);
-            alertDialog1.setCancelable(false);
-            alertDialog1.show();
+                });
+            }
+            if (passUserIdShowCustom != null) {
+                passUserIdShowCustom.setText(UserId);
+
+            }
         }).addOnFailureListener(e -> {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         });
