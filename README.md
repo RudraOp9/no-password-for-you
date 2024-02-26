@@ -4,7 +4,8 @@
 <h1 align="center">No Password For You</h1>
 <p align="center">No password for you is a lightweight, fast and open-source custom secure password generator written in java</p>
 
-<p  align = "center"> <img src="https://i.ibb.co/VgkpKPF/Screenshot-20240211-134000.png" height = "350  " alt="preview" border="0"></a>
+
+<h1 align="center"<br /><a href='https://github.com/RudraOp9/no-password-for-you/blob/master/Samples.md'>Samples</h1>
 
 ---
 
@@ -20,6 +21,7 @@
 
 - Allowing users to customize Password.✅✅✅
 - Add feature to secure password on cloud.✅✅❌ (Testing needed)
+- Material Design ✅❌❌
 - Add themes. ❌❌❌
 - Migrate to kotlin.❌❌❌
 - Adding security to app.✅✅❌
