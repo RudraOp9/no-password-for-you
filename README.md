@@ -11,9 +11,14 @@
 
 <h1>🔐 Overview</h1>
 
-- Lightweight ((to be announced ) Mb APK size)
-- No major permissions needed ! (no permissions currently)
+
+- Lightweight  4 Mb
+- No major permissions needed !
 - Very fast and secured !
+- Store to cloud
+- Secured by RSA algorithm
+- Generate custom highly configured passwords
+- interactive ui
 
 ---
 
