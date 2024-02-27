@@ -1,4 +1,4 @@
-
+<h1 align="center"<br /><a href='https://github.com/RudraOp9/no-password-for-you/releases/tag/alpha-0.0.02'> check out alpha-0.0.02 release !!!</h1>
 <p align = "center"><kbd> <img src="https://i.ibb.co/3fm3kt1/a694367e-4127-4a0b-82ec-b5ccfa336a7d.png" height = "200"  ></p>
 </kbd>
 <h1 align="center">No Password For You</h1>
