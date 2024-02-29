@@ -9,6 +9,29 @@
 
 ---
 
+<h1>Database Rules </h1>
+
+    service cloud.firestore {
+ 	 match /databases/{database}/documents {
+
+
+- Restrict access to all top-level collections
+- Allow access only to documents where the ID matches the user's UID
+- Allow access to subcollections and documents within the user's document
+	
+	   match /{collection}/{document}/{subcollection}/{subdocument} {
+   		 allow read : if request.auth != null && request.auth.uid  == document; // document = UID
+	 
+     	 allow update, delete: if request.auth != null && request.auth.uid == document;
+    	 allow create: if request.auth != null && request.auth.uid == document;
+	   }
+	  }
+	  }
+	   
+
+   
+---
+
 <h1>🔐 Overview</h1>
 
 
