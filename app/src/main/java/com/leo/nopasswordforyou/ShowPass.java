@@ -256,18 +256,16 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                                                             .document(auth.getCurrentUser().getUid())
                                                             .collection("YourPass")
                                                             .document(id);
-                                            assert passSaveCustom != null;
 
                                             Toast.makeText(this, "Working", Toast.LENGTH_SHORT).show();
                                             Map<String, String> data = new HashMap<>();
-                                            assert passTitleCustom != null;
-                                            if (!Objects.requireNonNull(passTitleCustom.getText()).toString().trim().equals(Title)) {
+
+                                        if (!Objects.requireNonNull(passTitleCustom.getText()).toString().trim().equals(Title)) {
                                                 data.put("Title", passTitleCustom.getText().toString());
                                             }
 
 
-                                            assert passDescCustom != null;
-                                            if (!Objects.requireNonNull(passDescCustom.getText()).toString().trim().equals(Desc)) {
+                                        if (!Objects.requireNonNull(passDescCustom.getText()).toString().trim().equals(Desc)) {
                                                 data.put("Desc", passDescCustom.getText().toString());
                                             }
                                             if ((data.size() != 0)) {
@@ -279,8 +277,8 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                                             if (ToDecode != null && !ToDecode.equals(Objects.requireNonNull(passSaveCustom.getText()).toString()) && Objects.requireNonNull(passSaveCustom.getText()).toString().length() > 50) {
                                                 data.put("pass", passSaveCustom.getText().toString());
                                             }
-                                            assert passUserIdCustom != null;
-                                            if (!Objects.requireNonNull(passUserIdCustom.getText()).toString().equals(UserId)) {
+
+                                        if (!Objects.requireNonNull(passUserIdCustom.getText()).toString().equals(UserId)) {
                                                 data.put("UserId", passUserIdCustom.getText().toString());
                                             }
                                             if (data.size() != 0) {
