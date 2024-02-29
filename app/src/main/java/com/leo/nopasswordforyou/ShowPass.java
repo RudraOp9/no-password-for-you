@@ -30,6 +30,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.Source;
 import com.leo.nopasswordforyou.helper.ItemClickListner;
 import com.leo.nopasswordforyou.helper.PassAdapter;
 import com.leo.nopasswordforyou.helper.PassAdapterData;
@@ -45,6 +46,7 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -76,7 +78,7 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
         alertDialog1.show();
         TextView t = alertDialog1.findViewById(R.id.loadingText);
         if (t != null) {
-            t.setText("Getting new passwords");
+            t.setText("Getting passwords");
         }
 
         rvPasses = findViewById(R.id.rvPasses);
@@ -108,21 +110,21 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
         passAdapter.setClickListener(this);
         rvPasses.setAdapter(passAdapter);
         rvPasses.setLayoutManager(new LinearLayoutManager(this));
-        getPasses();
+        getPasses(Source.CACHE);
 
 
-        syncPass.setOnClickListener(v -> getPasses());
+        syncPass.setOnClickListener(v -> getPasses(Source.SERVER));
 
 
     }
 
-    private void getPasses() {
+    private void getPasses(Source source) {
         if (!alertDialog1.isShowing()) {
             alertDialog1.show();
         }
 
         passData.clear();
-        dbTitles.get().addOnSuccessListener(queryDocumentSnapshots -> {
+        dbTitles.get(source).addOnSuccessListener(queryDocumentSnapshots -> {
 
             if (queryDocumentSnapshots != null) {
                 for (DocumentSnapshot a : queryDocumentSnapshots.getDocuments()) {
@@ -132,7 +134,11 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                 passAdapter.notifyDataSetChanged();
 
             }
-        }).addOnFailureListener(e -> Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+        }).addOnFailureListener(e -> {
+            Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            alertDialog1.dismiss();
+        });
+
     }
 
     @Override
@@ -160,7 +166,7 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                 String UserId = (String) documentSnapshot.get("UserId");
                 String decodedData = "No Key Added";
                 try {
-                    Security security = new Security(this);
+                    Security security = new Security(this, "NOPASSWORDFF!!!!" + Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
                     decodedData = security.decryptData(ToDecode);
                 } catch (NoSuchPaddingException | NoSuchAlgorithmException | KeyStoreException |
                          CertificateException | IOException | InvalidAlgorithmParameterException |
@@ -169,6 +175,7 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                          NoSuchProviderException | InvalidKeyException |
                          InvalidKeySpecException e) {
                     Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.d("tag", Objects.requireNonNull(e.getCause()) + " and " + Arrays.toString(e.getStackTrace()));
                     return;
                 }
 
@@ -218,37 +225,32 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                                     exitButtonCustom = alertDialog2.findViewById(R.id.exitButtonCustom);
                                     newPassCustom = alertDialog2.findViewById(R.id.newPassCustom);
 
-                                    if (passSaveCustom != null) {
-                                        passSaveCustom.setText(ToDecode);
-                                    }
-                                    if (passTitleCustom != null) {
-                                        passTitleCustom.setText(Title);
-                                    }
-                                    if (passDescCustom != null) {
-                                        passDescCustom.setText(Desc);
-                                    }
-                                    if (passUserIdCustom != null) {
-                                        passUserIdCustom.setText(UserId);
-                                    }
-                                    if (newPassCustom != null) {
-                                        newPassCustom.setOnClickListener(v15 -> {
-                                            Toast.makeText(this, "Copy the Encoded PassWord", Toast.LENGTH_SHORT).show();
-                                            startActivity(new Intent(ShowPass.this, GeneratePass.class));
-                                        });
-                                    }
-
-                                    //: MAKE CHANGES IN SHOW PASS.CLASS FOR NEW PASS CUSTOM.
-
-                                    if (exitButtonCustom != null) {
-                                        exitButtonCustom.setOnClickListener(v12 -> alertDialog2.dismiss());
-                                    } else {
+                                    if (!(passSaveCustom != null
+                                            && passUserIdCustom != null
+                                            && passTitleCustom != null
+                                            && passDescCustom != null
+                                            && newPassCustom != null
+                                            && exitButtonCustom != null
+                                            && passDoneCustom != null)) {
                                         Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
                                         alertDialog2.dismiss();
+                                        return;
                                     }
+                                    passSaveCustom.setText(ToDecode);
+                                    passTitleCustom.setText(Title);
+                                    passDescCustom.setText(Desc);
+                                    passUserIdCustom.setText(UserId);
+                                    newPassCustom.setOnClickListener(v15 -> {
+                                        Toast.makeText(this, "Copy the Encoded PassWord", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(ShowPass.this, GeneratePass.class));
+                                    });
 
 
-                                    if (passDoneCustom != null) {
-                                        passDoneCustom.setOnClickListener(v16 -> {
+                                    //: MAKE CHANGES IN SHOW PASS.CLASS FOR NEW PASS CUSTOM.
+                                    exitButtonCustom.setOnClickListener(v12 -> alertDialog2.dismiss());
+
+                                    // pass done custom
+                                    passDoneCustom.setOnClickListener(v16 -> {
                                             DocumentReference dbPass2 =
                                                     db.collection("PasswordManager")
                                                             .document(auth.getCurrentUser().getUid())
@@ -286,13 +288,12 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                                             }
                                             alertDialog2.dismiss();
                                             Toast.makeText(this, "updated", Toast.LENGTH_SHORT).show();
-
                                         });
-                                    }
+
 
                                     dialog.cancel();
                                     alertDialog1.dismiss();
-                                    getPasses();
+                                    //getPasses(Source.CACHE);
 
 
                                 })
@@ -306,7 +307,7 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
                                     });
 
                                     alertDialog1.dismiss();
-                                    getPasses();
+                                    getPasses(Source.SERVER);
 
                                     dialog.dismiss();
                                 });

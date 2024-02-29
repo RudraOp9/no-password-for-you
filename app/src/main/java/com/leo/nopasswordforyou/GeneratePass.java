@@ -1,29 +1,24 @@
 package com.leo.nopasswordforyou;
 
 
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatEditText;
-import androidx.appcompat.widget.AppCompatSpinner;
-
-import androidx.constraintlayout.widget.ConstraintLayout;
-
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -31,8 +26,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.leo.nopasswordforyou.helper.NewPass;
@@ -47,11 +40,9 @@ import java.security.NoSuchProviderException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -74,6 +65,7 @@ public class GeneratePass extends AppCompatActivity {
     byte alphaSmallLength = 6;
     byte passLength = 16;
     Security security = null;
+    FirebaseAuth auth = FirebaseAuth.getInstance();
 
 
     @Override
@@ -105,19 +97,24 @@ public class GeneratePass extends AppCompatActivity {
 
         textView = findViewById(R.id.textView);
 
+//TODO make an app for the ads on billboard etc...
 
         try {
-            security = new Security(this);
+            if (auth.getCurrentUser() == null) {
+                security = new Security(this, "NoPassWordForTheNewUser");
+            } else
+                security = new Security(this, "NOPASSWORDFF!!!!" + Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
+
         } catch (NoSuchPaddingException |
                  NoSuchAlgorithmException |
                  KeyStoreException |
                  CertificateException |
                  IOException e) {
             Toast.makeText(this, "Something Went Wrong : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            return;
         }
 
         copyPassEnc.setOnClickListener(v -> {
-            Toast.makeText(this, "This button is for this release only \n it will be removed in beta ++ releases", Toast.LENGTH_SHORT).show();
             String copy = "Task Failed";
             try {
                 copy = security.encryptData(passText.getText().toString());
@@ -133,6 +130,9 @@ public class GeneratePass extends AppCompatActivity {
             ClipboardManager clipboard = (ClipboardManager) GeneratePass.this.getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Copied Text", copy);
             clipboard.setPrimaryClip(clip);
+            Snackbar.make(v, "This button is for this release only \n it will be removed in beta ++ releases", 3000);
+            Toast.makeText(this, "copied", Toast.LENGTH_SHORT).show();
+            finish();
         });
         regeneratePass.setOnClickListener(v -> {
             passText.setText(newPass.generateNewPass(alphaCapLength, specialSymbol, numberslen, alphaSmallLength, passLength));
@@ -147,6 +147,12 @@ public class GeneratePass extends AppCompatActivity {
         });
 
         saveToCloud.setOnClickListener(v -> {
+
+            if (auth.getCurrentUser() == null) {
+                Toast.makeText(this, "Login First !", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             AlertDialog alertDialog;
             alertDialog = new MaterialAlertDialogBuilder(this).setView(R.layout.custom_save_to_cloud).create();
             alertDialog.setCanceledOnTouchOutside(false);
@@ -183,6 +189,7 @@ public class GeneratePass extends AppCompatActivity {
 
 
             if (passDoneCustom != null) {
+
                 passDoneCustom.setOnClickListener(v1 -> {
                     if ((Objects.requireNonNull(Objects.requireNonNull(passTitleCustom).getText())).toString().isEmpty()) {
                         Snackbar.make(v1, "Empty title", 2000).show();
@@ -226,7 +233,7 @@ public class GeneratePass extends AppCompatActivity {
                             return;
                         }
                         FirebaseFirestore db = FirebaseFirestore.getInstance();
-                        FirebaseAuth auth = FirebaseAuth.getInstance();
+
                         if (auth.getCurrentUser() != null) {
                             String id = String.valueOf(System.currentTimeMillis());
                             DocumentReference dbPass =

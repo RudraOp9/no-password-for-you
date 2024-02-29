@@ -1,33 +1,24 @@
 package com.leo.nopasswordforyou.helper;
 
 import android.content.Context;
-
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import android.util.Log;
-
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
-
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-
 import java.security.UnrecoverableEntryException;
-
 import java.security.cert.CertificateException;
-
 import java.security.spec.InvalidKeySpecException;
-
-import java.util.Objects;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -46,13 +37,14 @@ public class Security {
     Cipher cipher;
     KeyStore keyStore;
     Context context;
-    final String alias = "NOPASSWORDF!!!!" + Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+    String alias;
 
-    public Security(Context context) throws NoSuchPaddingException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
+    public Security(Context context, String alias) throws NoSuchPaddingException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
         this.context = context;
         cipher = Cipher.getInstance(TRANSFORMATION);
         keyStore = KeyStore.getInstance(KEYSTORE);
         keyStore.load(null);
+        this.alias = alias;
 
     }
 
