@@ -16,9 +16,12 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Date;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -103,7 +106,7 @@ public class Security {
     private Key newKey() throws
             NoSuchAlgorithmException,
             NoSuchProviderException,
-            InvalidAlgorithmParameterException {
+            InvalidAlgorithmParameterException, KeyStoreException {
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM, KEYSTORE);
         KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec
@@ -113,8 +116,13 @@ public class Security {
                 .build();
 
         keyPairGenerator.initialize(keyGenParameterSpec);
+        PrivateKey key = keyPairGenerator.generateKeyPair().getPrivate();
 
-        Log.d("tag","done in new Key returning keypublic");
+        KeyStore.Entry entry = new KeyStore.PrivateKeyEntry(key, new Certificate[]{keyStore.getCertificate("yes")});
+        //  java.util.Base64.getDecoder().decode(entry)
+        //  Log.d("tag",entry);
+
+        Log.d("tag", "done in new Key returning keypublic");
         return keyPairGenerator.generateKeyPair().getPublic();
 
     }
