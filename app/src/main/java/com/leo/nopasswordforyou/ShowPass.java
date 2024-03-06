@@ -1,3 +1,22 @@
+/*
+ *  No password for you
+ *  Created by RudraOp9
+ *  Modified on 05/03/24, 3:42 pm
+ *  Copyright (c) 2024 . All rights reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package com.leo.nopasswordforyou;
 
 import android.content.ClipData;
@@ -56,6 +75,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 public class ShowPass extends AppCompatActivity implements ItemClickListner {
+    MaterialTextView keySet;
     RecyclerView rvPasses;
     FirebaseFirestore db;
     FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -64,13 +84,15 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
     FloatingActionButton syncPass;
     ArrayList<PassAdapterData> passData;
     PassAdapter passAdapter;
-    AlertDialog alertDialog1;
+    AlertDialog alertDialog1, keySetting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_pass);
 
+
+        keySet = findViewById(R.id.keySet);
 
         alertDialog1 = new MaterialAlertDialogBuilder(this).setView(R.layout.loading_dilogue_2).create();
         alertDialog1.setCanceledOnTouchOutside(false);
@@ -114,7 +136,41 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
 
 
         syncPass.setOnClickListener(v -> getPasses(Source.SERVER));
+        keySet.setOnClickListener(v -> {
 
+            keySetting = new MaterialAlertDialogBuilder(this).setView(R.layout.custom_keyset).create();
+            keySetting.setCanceledOnTouchOutside(true);
+            keySetting.setCancelable(true);
+            keySetting.show();
+            MaterialButton newKey = keySetting.findViewById(R.id.newKey);
+            MaterialButton addKey = keySetting.findViewById(R.id.addKey);
+            if (newKey != null) {
+                newKey.setOnClickListener(v1 -> {
+
+                    try {
+                        Security security = new Security(this, "Testing!!!!" + auth.getCurrentUser().getUid());
+                        Toast.makeText(this, security.newKey(), Toast.LENGTH_SHORT).show();
+                    } catch (NoSuchPaddingException | NoSuchAlgorithmException | KeyStoreException |
+                             CertificateException | InvalidAlgorithmParameterException |
+                             IOException e) {
+                        throw new RuntimeException(e);
+                        //Todo handle error
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+
+                });
+            }
+
+            if (addKey != null) {
+                addKey.setOnClickListener(v12 -> {
+
+                    Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show();
+
+
+                });
+            }
+        });
 
     }
 
@@ -251,42 +307,42 @@ public class ShowPass extends AppCompatActivity implements ItemClickListner {
 
                                     // pass done custom
                                     passDoneCustom.setOnClickListener(v16 -> {
-                                            DocumentReference dbPass2 =
-                                                    db.collection("PasswordManager")
-                                                            .document(auth.getCurrentUser().getUid())
-                                                            .collection("YourPass")
-                                                            .document(id);
+                                        DocumentReference dbPass2 =
+                                                db.collection("PasswordManager")
+                                                        .document(auth.getCurrentUser().getUid())
+                                                        .collection("YourPass")
+                                                        .document(id);
 
-                                            Toast.makeText(this, "Working", Toast.LENGTH_SHORT).show();
-                                            Map<String, String> data = new HashMap<>();
+                                        Toast.makeText(this, "Working", Toast.LENGTH_SHORT).show();
+                                        Map<String, String> data = new HashMap<>();
 
                                         if (!Objects.requireNonNull(passTitleCustom.getText()).toString().trim().equals(Title)) {
-                                                data.put("Title", passTitleCustom.getText().toString());
-                                            }
+                                            data.put("Title", passTitleCustom.getText().toString());
+                                        }
 
 
                                         if (!Objects.requireNonNull(passDescCustom.getText()).toString().trim().equals(Desc)) {
-                                                data.put("Desc", passDescCustom.getText().toString());
-                                            }
-                                            if ((data.size() != 0)) {
+                                            data.put("Desc", passDescCustom.getText().toString());
+                                        }
+                                        if ((data.size() != 0)) {
 
-                                                dbPass2.set(data, SetOptions.merge()).addOnFailureListener(e -> Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_SHORT).show());
-                                            }
-                                            data.clear();
+                                            dbPass2.set(data, SetOptions.merge()).addOnFailureListener(e -> Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+                                        }
+                                        data.clear();
 
-                                            if (ToDecode != null && !ToDecode.equals(Objects.requireNonNull(passSaveCustom.getText()).toString()) && Objects.requireNonNull(passSaveCustom.getText()).toString().length() > 50) {
-                                                data.put("pass", passSaveCustom.getText().toString());
-                                            }
+                                        if (ToDecode != null && !ToDecode.equals(Objects.requireNonNull(passSaveCustom.getText()).toString()) && Objects.requireNonNull(passSaveCustom.getText()).toString().length() > 50) {
+                                            data.put("pass", passSaveCustom.getText().toString());
+                                        }
 
                                         if (!Objects.requireNonNull(passUserIdCustom.getText()).toString().equals(UserId)) {
-                                                data.put("UserId", passUserIdCustom.getText().toString());
-                                            }
-                                            if (data.size() != 0) {
-                                                dbPass2.set(data, SetOptions.merge()).addOnFailureListener(e -> Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_SHORT).show());
-                                            }
-                                            alertDialog2.dismiss();
-                                            Toast.makeText(this, "updated", Toast.LENGTH_SHORT).show();
-                                        });
+                                            data.put("UserId", passUserIdCustom.getText().toString());
+                                        }
+                                        if (data.size() != 0) {
+                                            dbPass2.set(data, SetOptions.merge()).addOnFailureListener(e -> Toast.makeText(ShowPass.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+                                        }
+                                        alertDialog2.dismiss();
+                                        Toast.makeText(this, "updated", Toast.LENGTH_SHORT).show();
+                                    });
 
 
                                     dialog.cancel();
