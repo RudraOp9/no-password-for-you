@@ -26,6 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="15dp"
             android:fontFamily="@font/open_sans"
+            android:textStyle="bold"
             android:padding="5dp"
             android:text="Title"
             android:textSize="26sp"

@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:text="Authenticating..."
         android:layout_margin="10dp"
-        app:fontFamily="sans-serif-smallcaps"
+        android:fontFamily="@font/open_sans"
         android:textStyle="bold"
         android:padding="5dp"
 

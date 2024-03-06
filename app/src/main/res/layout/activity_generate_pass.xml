@@ -10,6 +10,8 @@
         android:id="@+id/layout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
+
         android:padding="40dp">
 
 
@@ -26,6 +28,9 @@
             android:text="@string/generating_password"
             android:textColor="@color/black"
             android:textSize="25sp"
+
+            android:fontFamily="@font/open_sans"
+
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -87,6 +92,9 @@
             android:backgroundTint="#E9DCFE"
             android:text="copy encrypted pass"
             android:textColor="@color/black"
+
+            android:fontFamily="@font/open_sans"
+
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/passText" />
@@ -97,6 +105,9 @@
             android:layout_height="wrap_content"
             android:text="@string/custom_settings"
             android:textSize="18sp"
+
+            android:fontFamily="@font/open_sans"
+
             app:layout_constraintBaseline_toBaselineOf="@+id/customSetSwitch"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -135,6 +146,9 @@
                     android:layout_height="wrap_content"
                     android:text="@string/password_length"
                     android:textSize="17sp"
+
+                    android:fontFamily="@font/open_sans"
+
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -160,6 +174,10 @@
                     android:layout_height="wrap_content"
                     android:text="@string/capital_letters"
                     android:textSize="17sp"
+
+                    android:fontFamily="@font/open_sans"
+
+
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -185,6 +203,9 @@
                     android:layout_height="wrap_content"
                     android:text="@string/small_letters"
                     android:textSize="17sp"
+
+                    android:fontFamily="@font/open_sans"
+
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -194,6 +215,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
                     android:layout_marginEnd="20dp"
+
+
                     android:popupBackground="@drawable/spinner_dropdown_background"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -210,6 +233,10 @@
                     android:layout_height="wrap_content"
                     android:text="@string/special_symbols"
                     android:textSize="17sp"
+
+                    android:fontFamily="@font/open_sans"
+
+
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -235,6 +262,9 @@
                     android:layout_height="wrap_content"
                     android:text="@string/numbers"
                     android:textSize="17sp"
+
+                    android:fontFamily="@font/open_sans"
+
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -245,6 +275,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
                     android:layout_marginEnd="20dp"
+
+
                     android:popupBackground="@drawable/spinner_dropdown_background"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />

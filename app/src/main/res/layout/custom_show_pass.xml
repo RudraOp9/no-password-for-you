@@ -23,6 +23,7 @@
         android:layout_marginTop="5dp"
         android:textSize="17sp"
         android:text="your user id"
+        android:fontFamily="@font/open_sans"
 
         />
 
@@ -43,6 +44,7 @@
             android:layout_gravity="center"
 
             android:text="kithuthirhiolothithikkt"
+            android:fontFamily="@font/open_sans"
             app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -76,6 +78,7 @@
             app:cornerRadius="5dp"
             android:backgroundTint="#E9DCFE"
             android:text="pass"
+            android:fontFamily="@font/open_sans"
             android:textColor="@color/black"
             app:icon="@drawable/icon_copy_24"
             app:iconTint="@color/black"
@@ -89,6 +92,7 @@
             app:cornerRadius="5dp"
             android:backgroundTint="#E9DCFE"
             android:text="id"
+            android:fontFamily="@font/open_sans"
             android:textColor="@color/black"
             app:icon="@drawable/icon_copy_24"
             app:iconTint="@color/black"

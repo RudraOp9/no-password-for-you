@@ -15,7 +15,7 @@
         android:layout_marginTop="10dp"
         android:text="Passwords"
         android:textSize="25sp"
-
+        android:fontFamily="@font/open_sans"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -31,6 +31,7 @@
         android:paddingEnd="20dp"
         android:paddingBottom="5dp"
         android:text="Key"
+        android:fontFamily="@font/open_sans"
         android:textAlignment="center"
         android:textSize="13sp"
         app:layout_constraintEnd_toEndOf="parent"

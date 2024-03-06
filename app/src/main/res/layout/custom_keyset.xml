@@ -21,7 +21,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="50dp">
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/newKey"
@@ -32,6 +33,7 @@
         android:padding="10dp"
         android:text="New Key"
         android:textColor="@color/black"
+        android:fontFamily="@font/open_sans"
         app:cornerRadius="5dp"
         app:icon="@drawable/icon_new_24"
         app:iconSize="24dp"
@@ -50,6 +52,7 @@
         android:backgroundTint="#D8D8D8"
         android:padding="10dp"
         android:text="Add Key"
+        android:fontFamily="@font/open_sans"
         android:textColor="@color/black"
         app:cornerRadius="5dp"
         app:icon="@drawable/icon_add_box_24"
