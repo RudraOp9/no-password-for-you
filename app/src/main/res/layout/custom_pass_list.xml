@@ -4,13 +4,13 @@
     android:id="@+id/passParent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="30dp"
+    android:layout_marginStart="10dp"
     android:layout_marginTop="5dp"
-    android:layout_marginEnd="30dp"
-    android:layout_marginBottom="15dp"
+    android:layout_marginEnd="10dp"
+    android:layout_marginBottom="10dp"
     android:padding="10dp"
-    app:cardElevation="15dp"
-    app:cardCornerRadius="10dp"
+    app:cardCornerRadius="5dp"
+    app:cardElevation="2dp"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
@@ -29,7 +29,7 @@
             android:textStyle="bold"
             android:padding="5dp"
             android:text="Title"
-            android:textSize="26sp"
+            android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

@@ -1,7 +1,7 @@
 /*
  *  No password for you
  *  Created by RudraOp9
- *  Modified on 29/02/24, 7:44 pm
+ *  Modified on 10/03/24, 7:12 pm
  *  Copyright (c) 2024 . All rights reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
  *  limitations under the License.
  */
 
-package com.leo.nopasswordforyou;
+package com.leo.nopasswordforyou.activities;
 
 
 import android.content.ClipData;
@@ -28,27 +28,25 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
-import androidx.appcompat.widget.AppCompatSpinner;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.leo.nopasswordforyou.helper.NewPass;
-import com.leo.nopasswordforyou.helper.Security;
+import com.leo.nopasswordforyou.R;
+import com.leo.nopasswordforyou.databinding.ActivityGeneratePassBinding;
+import com.leo.nopasswordforyou.secuirity.Security;
+import com.leo.nopasswordforyou.viewmodel.GeneratePassVM;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -69,52 +67,31 @@ import javax.crypto.NoSuchPaddingException;
 
 public class GeneratePass extends AppCompatActivity {
 
-    AppCompatSpinner spinnerNumbers, spinnerSpecialSym, spinnerSmallLetter, spinnerCapLetter;
-    TextView passText, textView;
-    Button copyPassEnc;
-
-    FloatingActionButton copyPass, regeneratePass, saveToCloud;
-    MaterialSwitch customSetSwitch;
-    LinearLayout customSettings;
-    ConstraintLayout layout2;
-
-    byte alphaCapLength = 4;
-    byte specialSymbol = 2;
-    byte numberslen = 4;
-    byte alphaSmallLength = 6;
-    byte passLength = 16;
     Security security = null;
     FirebaseAuth auth = FirebaseAuth.getInstance();
 
 
+    GeneratePassVM vm;
+    private ActivityGeneratePassBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_generate_pass);
+        binding = ActivityGeneratePassBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
+        vm = new ViewModelProvider(this).get(GeneratePassVM.class);
+
+        vm.getPassWord().observe(this, s -> {
+            binding.passText.setText(s);
+        });
+
+        vm.getTotal().observe(this, s -> {
+            binding.total.setText(s);
+        });
 
 
-        NewPass newPass = new NewPass();
-        layout2 = findViewById(R.id.layout2);
-        customSettings = findViewById(R.id.customSettings);
 
-        copyPass = findViewById(R.id.copyPass);
-        customSetSwitch = findViewById(R.id.customSetSwitch);
-
-        spinnerCapLetter = findViewById(R.id.spinnerCapLetter);
-        spinnerSmallLetter = findViewById(R.id.spinnerSmallLetter);
-        spinnerSpecialSym = findViewById(R.id.spinnerSpecialSym);
-        spinnerNumbers = findViewById(R.id.spinnerNumbers);
-
-        copyPassEnc = findViewById(R.id.copyPassEnc);
-
-
-        regeneratePass = findViewById(R.id.regeneratePass);
-        saveToCloud = findViewById(R.id.saveToCloud);
-
-        passText = findViewById(R.id.passText);
-        passText.setText(newPass.generateNewPass(alphaCapLength, specialSymbol, numberslen, alphaSmallLength, passLength));
-
-        textView = findViewById(R.id.textView);
 
 //TODO make an app for the ads on billboard etc...
 
@@ -133,10 +110,11 @@ public class GeneratePass extends AppCompatActivity {
             return;
         }
 
-        copyPassEnc.setOnClickListener(v -> {
+        binding.copyPassEnc.setOnClickListener(v -> {
             String copy = "Task Failed";
             try {
-                copy = security.encryptData(passText.getText().toString());
+                if (binding.passText.getText() != null)
+                    copy = security.encryptData(Objects.requireNonNull(binding.passText.getText()).toString());
             } catch (InvalidAlgorithmParameterException | KeyStoreException |
                      NoSuchAlgorithmException | NoSuchProviderException |
                      InvalidKeyException |
@@ -149,36 +127,25 @@ public class GeneratePass extends AppCompatActivity {
             ClipboardManager clipboard = (ClipboardManager) GeneratePass.this.getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Copied Text", copy);
             clipboard.setPrimaryClip(clip);
-            Snackbar.make(v, "This button is for this release only \n it will be removed in beta ++ releases", 3000);
+            //    Snackbar.make(v, "This button is for this release only \n it will be removed in beta ++ releases", 3000);
             Toast.makeText(this, "copied", Toast.LENGTH_SHORT).show();
             finish();
         });
-        regeneratePass.setOnClickListener(v -> {
-            passText.setText(newPass.generateNewPass(alphaCapLength, specialSymbol, numberslen, alphaSmallLength, passLength));
-      /*      try {
-                test.setText(security.decryptData(test.getText().toString()));
-            } catch (InvalidKeyException | InvalidAlgorithmParameterException |
-                     IllegalBlockSizeException | BadPaddingException |
-                     NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException |
-                     UnrecoverableEntryException | InvalidKeySpecException e) {
-                Snackbar.make(v, Objects.requireNonNull(e.getMessage()), 3000).show();
-            }*/
+        binding.regeneratePass.setOnClickListener(v -> {
+            vm.genNewPass();
         });
 
-        saveToCloud.setOnClickListener(v -> {
+        binding.saveToCloud.setOnClickListener(v -> {
 
             if (auth.getCurrentUser() == null) {
                 Toast.makeText(this, "Login First !", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            AlertDialog alertDialog;
-            alertDialog = new MaterialAlertDialogBuilder(this).setView(R.layout.custom_save_to_cloud).create();
+            AlertDialog alertDialog = new MaterialAlertDialogBuilder(this).setView(R.layout.custom_save_to_cloud).create();
             alertDialog.setCanceledOnTouchOutside(false);
-            alertDialog.setCancelable(false);
-
-
             alertDialog.show();
+
             AppCompatEditText passTitleCustom, passUserIdCustom, passDescCustom, passSaveCustom;
             FloatingActionButton passDoneCustom, exitButtonCustom;
             MaterialButton newPassCustom;
@@ -201,14 +168,9 @@ public class GeneratePass extends AppCompatActivity {
 
             if (exitButtonCustom != null) {
                 exitButtonCustom.setOnClickListener(v12 -> alertDialog.dismiss());
-            } else {
-                Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
-                alertDialog.dismiss();
             }
 
-
             if (passDoneCustom != null) {
-
                 passDoneCustom.setOnClickListener(v1 -> {
                     if ((Objects.requireNonNull(Objects.requireNonNull(passTitleCustom).getText())).toString().isEmpty()) {
                         Snackbar.make(v1, "Empty title", 2000).show();
@@ -236,7 +198,8 @@ public class GeneratePass extends AppCompatActivity {
                         alertDialog.dismiss();
                         String encPass = "";
                         try {
-                            encPass = security.encryptData(passText.getText().toString());
+                            if (binding.passText.getText() != null)
+                                encPass = security.encryptData(binding.passText.getText().toString());
                         } catch (InvalidAlgorithmParameterException | KeyStoreException |
                                  NoSuchAlgorithmException | NoSuchProviderException |
                                  InvalidKeyException |
@@ -247,7 +210,7 @@ public class GeneratePass extends AppCompatActivity {
                             return;
                         }
 
-                        if (encPass.equals("")) {
+                        if (encPass.isEmpty()) {
                             Toast.makeText(this, "Error : Contact Support", Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -301,22 +264,18 @@ public class GeneratePass extends AppCompatActivity {
 
         });
 
-        copyPass.setOnClickListener(v -> {
-
-
+        binding.copyPass.setOnClickListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) GeneratePass.this.getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("Copied Text", passText.getText());
+            ClipData clip = ClipData.newPlainText("Copied Text", binding.passText.getText());
             clipboard.setPrimaryClip(clip);
             Handler handler = new Handler();
-            copyPass.setImageResource(R.drawable.icon_done_24);
+            binding.copyPass.setImageResource(R.drawable.icon_done_24);
             //    copyPass.setBackgroundResource(R.drawable.icon_done_24);
-            handler.postDelayed(() -> copyPass.setImageResource(R.drawable.icon_copy_24), 1500);
-
-
+            handler.postDelayed(() -> binding.copyPass.setImageResource(R.drawable.icon_copy_24), 1500);
         });
 
 
-        String[] values = {"10", "9", "8", "7", "6", "5", "4", "3", "2", "1"};
+        String[] values = {"10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
@@ -324,88 +283,86 @@ public class GeneratePass extends AppCompatActivity {
                 , values);
 
 
-        spinnerCapLetter.setAdapter(adapter);
-        spinnerNumbers.setAdapter(adapter);
-        spinnerSmallLetter.setAdapter(adapter);
-        spinnerSpecialSym.setAdapter(adapter);
+        binding.spinnerCapLetter.setAdapter(adapter);
+        binding.spinnerNumbers.setAdapter(adapter);
+        binding.spinnerSmallLetter.setAdapter(adapter);
+        binding.spinnerSpecialSym.setAdapter(adapter);
+        binding.spinnerCapLetter.setSelection(4);
+        binding.spinnerNumbers.setSelection(4);
+        binding.spinnerSmallLetter.setSelection(6);
+        binding.spinnerSpecialSym.setSelection(2);
 
-        spinnerNumbers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+        binding.spinnerNumbers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                numberslen = Byte.parseByte(values[position]);
-                updateTotalText();
+                vm.setNumberslen(Byte.parseByte(values[position]));
+
+                vm.updateTotalText();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                numberslen = 4;
-                updateTotalText();
+                vm.setNumberslen((byte) 4);
+                vm.updateTotalText();
             }
         });
-        spinnerCapLetter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        binding.spinnerCapLetter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)     {
-                alphaCapLength = Byte.parseByte(values[position]);
-                updateTotalText();
+                vm.setAlphaCapLength(Byte.parseByte(values[position]));
+                vm.updateTotalText();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                alphaCapLength = 4;
-                updateTotalText();
+                vm.setAlphaCapLength((byte) 4);
+                vm.updateTotalText();
             }
         });
-        spinnerSmallLetter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        binding.spinnerSmallLetter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                alphaSmallLength = Byte.parseByte(values[position]);
-                updateTotalText();
+                vm.setAlphaSmallLength(Byte.parseByte(values[position]));
+                vm.updateTotalText();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                numberslen = 6;
-                updateTotalText();
+                vm.setNumberslen((byte) 6);
+                vm.updateTotalText();
             }
         });
-        spinnerSpecialSym.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        binding.spinnerSpecialSym.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                specialSymbol = Byte.parseByte(values[position]);
-                updateTotalText();
+                vm.setSpecialSymbol(Byte.parseByte(values[position]));
+                vm.updateTotalText();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                numberslen = 2;
-                updateTotalText();
+                vm.setNumberslen((byte) 2);
+                ;
+                vm.updateTotalText();
             }
         });
-        customSetSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        binding.customSetSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                customSettings.setVisibility(View.VISIBLE);
-                numberslen = Byte.parseByte((String) spinnerNumbers.getSelectedItem());
-                alphaCapLength = Byte.parseByte((String) spinnerCapLetter.getSelectedItem());
-                alphaSmallLength = Byte.parseByte((String) spinnerSmallLetter.getSelectedItem());
-                specialSymbol = Byte.parseByte((String) spinnerSpecialSym.getSelectedItem());
+                binding.customSettings.setVisibility(View.VISIBLE);
+                vm.setNumberslen(Byte.parseByte((String) binding.spinnerNumbers.getSelectedItem()));
+                vm.setAlphaCapLength(Byte.parseByte((String) binding.spinnerCapLetter.getSelectedItem()));
+                vm.setAlphaSmallLength(Byte.parseByte((String) binding.spinnerSmallLetter.getSelectedItem()));
+                vm.setSpecialSymbol(Byte.parseByte((String) binding.spinnerSpecialSym.getSelectedItem()));
             } else {
-                customSettings.setVisibility(View.GONE);
-                alphaCapLength = 4;
-                specialSymbol = 2;
-                numberslen = 4;
-                alphaSmallLength = 6;
-                passLength = 16;
+                binding.customSettings.setVisibility(View.GONE);
+                vm.setNumberslen((byte) 4);
+                vm.setAlphaCapLength((byte) 4);
+                vm.setAlphaSmallLength((byte) 6);
+                vm.setSpecialSymbol((byte) 2);
+                vm.setPassLength((byte) 16);
             }
         });
-
-
     }
-
-    private void updateTotalText() {
-        int total = alphaCapLength + alphaSmallLength + specialSymbol + numberslen;
-        String k = String.valueOf(total);
-        textView.setText(k);
-    }
-
 
 }

@@ -13,18 +13,18 @@
         android:theme="@style/Theme.NoPasswordForYou"
         tools:targetApi="31">
         <activity
-            android:name=".ShowPass"
+            android:name=".activities.ShowPass"
             android:exported="false">
 
         </activity>
         <activity
-            android:name=".GeneratePass"
+            android:name=".activities.GeneratePass"
             android:exported="false" />
         <activity
-            android:name=".login_page"
+            android:name=".activities.login_page"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

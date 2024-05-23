@@ -1,12 +1,34 @@
-package com.leo.nopasswordforyou.helper;
+/*
+ *  No password for you
+ *  Created by RudraOp9
+ *  Modified on 22/05/24, 10:55 am
+ *  Copyright (c) 2024 . All rights reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+package com.leo.nopasswordforyou.secuirity;
 
 import static org.bouncycastle.asn1.x509.Extension.authorityKeyIdentifier;
 import static org.bouncycastle.asn1.x509.Extension.subjectKeyIdentifier;
 
 import android.content.Context;
+import android.os.Environment;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import android.util.Log;
+
+import com.google.gson.Gson;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
@@ -19,6 +41,8 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -31,18 +55,12 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Date;
-import java.util.Enumeration;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -71,38 +89,13 @@ public class Security {
 
     }
 
-    public String encryptData(String pass) throws InvalidAlgorithmParameterException, KeyStoreException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnrecoverableEntryException, InvalidKeySpecException {
-        String encPass;
-
-        cipher.init(Cipher.ENCRYPT_MODE, getKey(Cipher.ENCRYPT_MODE));
-        encPass = new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
-        Log.d("tag", "in encryptData try block ");
-
-
-        return encPass;
-    }
-
-    public String decryptData(String pass) throws
-            InvalidKeyException,
-            InvalidAlgorithmParameterException,
-            IllegalBlockSizeException,
-            BadPaddingException,
-            NoSuchAlgorithmException,
-            KeyStoreException,
-            NoSuchProviderException,
-            UnrecoverableEntryException, InvalidKeySpecException {
-
-        cipher.init(Cipher.DECRYPT_MODE, getKey(Cipher.DECRYPT_MODE));
-        return new String(cipher.doFinal(Base64.decode(pass, Base64.DEFAULT)), StandardCharsets.UTF_8);
-    }
-
     public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair) throws Exception {
         java.security.Security.setProperty("crypto.policy", "unlimited");
-        org.bouncycastle.asn1.x500.X500Name issuer = new X500Name("CN=Your Issuer");
-        org.bouncycastle.asn1.x500.X500Name subject = new X500Name("CN=Your Subject");
-        java.math.BigInteger serialNumber = BigInteger.valueOf(System.currentTimeMillis());
+        X500Name issuer = new X500Name("CN= No PassWord For You");
+        X500Name subject = new X500Name("CN= PassWord Encryption");
+        BigInteger serialNumber = BigInteger.valueOf(System.currentTimeMillis());
 
-        org.bouncycastle.asn1.x509.SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
+        SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
 
         X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
                 issuer,
@@ -122,12 +115,40 @@ public class Security {
         return new JcaX509CertificateConverter().getCertificate(certHolder);
     }
 
+    public String encryptData(String pass)
+            throws InvalidAlgorithmParameterException,
+            KeyStoreException,
+            NoSuchAlgorithmException,
+            NoSuchProviderException,
+            InvalidKeyException,
+            IllegalBlockSizeException,
+            BadPaddingException,
+            UnrecoverableEntryException,
+            InvalidKeySpecException {
+        String encPass;
+
+        cipher.init(Cipher.ENCRYPT_MODE, getKey(Cipher.ENCRYPT_MODE));
+        encPass = new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
+        Log.d("tag", "in encryptData try block ");
+        return encPass;
+    }
+
+    public String decryptData(String pass) throws
+            InvalidKeyException,
+            IllegalBlockSizeException,
+            BadPaddingException,
+            NoSuchAlgorithmException,
+            KeyStoreException,
+            UnrecoverableEntryException {
+
+        cipher.init(Cipher.DECRYPT_MODE, getKey(Cipher.DECRYPT_MODE));
+        return new String(cipher.doFinal(Base64.decode(pass, Base64.DEFAULT)), StandardCharsets.UTF_8);
+    }
+
     private Key getKey(int mode) throws
             RuntimeException,
             KeyStoreException,
-            InvalidAlgorithmParameterException,
             NoSuchAlgorithmException,
-            NoSuchProviderException,
             InvalidKeyException,
             UnrecoverableEntryException {
 
@@ -149,51 +170,63 @@ public class Security {
 
     }
 
-    public String newKey() throws
-            Exception {
-
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
+    public String newKey() {
+        KeyPairGenerator keyPairGenerator;
+        try {
+            keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
+        } catch (NoSuchAlgorithmException e) {
+            return "Error" + e.getLocalizedMessage();
+        }
        /* KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec
                 .Builder(alias, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
                 .setEncryptionPaddings(PADDING)
                 .build();*/
-        Enumeration<String> a22 = keyStore.aliases();
-        while (a22.hasMoreElements()) Log.d("tag", a22.nextElement());
 
         keyPairGenerator.initialize(2048);
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+        KeyPair keyPair = keyPairGenerator.genKeyPair();
+     /*
+        keyStore.setKeyEntry(alias+"public",keyPair.getPublic(),null,null);
+        Enumeration<String> a22 = keyStore.aliases();
+        while (a22.hasMoreElements()) Log.d("tagy", a22.nextElement());*/
+        X509Certificate cert;
+        try {
+            cert = generateSelfSignedCertificate(keyPair);
+            keyStore.setKeyEntry(alias + "private", keyPair.getPrivate(), null, new Certificate[]{cert});
+        } catch (Exception e) {
+            return "Error" + e.getLocalizedMessage();
+        }
 
-        PrivateKey key = keyPairGenerator.generateKeyPair().getPrivate();
 
-        String a = privateKeyEntryToString(keyPair.getPublic(), keyPair.getPrivate(), keyPair);
+        var a = new KeyFile(keyPair.getPrivate().getEncoded(),
+                keyPair.getPrivate().getFormat(),
+                keyPair.getPublic().getEncoded(),
+                keyPair.getPublic().getFormat());
 
+        Gson gson = new Gson();
+        String json = gson.toJson(a);
 
-        Log.d("tag", "done in new Key returning keypublic   " + a);
-        Enumeration<String> a21 = keyStore.aliases();
-        while (a21.hasMoreElements()) Log.d("tag", a21.nextElement());
+        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-
-        return a;
+        if (dir != null) {
+            File jsonData = new File(dir.getPath(), alias + ".ppk");
+            try {
+                jsonData.createNewFile();
+            } catch (IOException e) {
+                return "can't create file";
+            }
+            if (jsonData.canWrite()) {
+                try {
+                    FileOutputStream writer = new FileOutputStream(jsonData);
+                    writer.write(json.getBytes());
+                    writer.close();
+                } catch (IOException e) {
+                    return "Failed : " + e.getLocalizedMessage();
+                }
+            } else return "Need Permission to save File";
+        } else return "something went wrong";
+        return "done";
         // return keyPairGenerator.generateKeyPair().getPublic();
 
     }
-
-    private String privateKeyEntryToString(PublicKey publicKey, PrivateKey key, KeyPair keyPair) throws Exception {
-
-        X509Certificate cert = generateSelfSignedCertificate(keyPair);
-        keyStore.setKeyEntry(alias, key, null, new Certificate[]{cert});
-
-        if (key.getEncoded().length == 0) {
-            return "null";
-        }
-
-        // Convert PrivateKey and Certificate to String
-        String privateKeyString = Base64.encodeToString(key.getEncoded(), Base64.DEFAULT);
-        String certificateString = Base64.encodeToString(cert.getEncoded(), Base64.DEFAULT);
-
-        // Combine both strings with a separator for later use
-        return privateKeyString + "-----BEGIN CERTIFICATE-----\n" + certificateString;
-    }
-
 }
