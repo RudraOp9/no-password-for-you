@@ -16,353 +16,340 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package com.leo.nopasswordforyou.activities
 
-package com.leo.nopasswordforyou.activities;
-
-
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatEditText;
-import androidx.lifecycle.ViewModelProvider;
-
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.leo.nopasswordforyou.R;
-import com.leo.nopasswordforyou.databinding.ActivityGeneratePassBinding;
-import com.leo.nopasswordforyou.secuirity.Security;
-import com.leo.nopasswordforyou.viewmodel.GeneratePassVM;
-
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
-public class GeneratePass extends AppCompatActivity {
-
-    Security security = null;
-    FirebaseAuth auth = FirebaseAuth.getInstance();
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.Editable
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.CompoundButton
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatEditText
+import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.leo.nopasswordforyou.R
+import com.leo.nopasswordforyou.databinding.ActivityGeneratePassBinding
+import com.leo.nopasswordforyou.secuirity.Security
+import com.leo.nopasswordforyou.viewmodel.GeneratePassVM
+import java.util.Objects
 
 
-    GeneratePassVM vm;
-    private ActivityGeneratePassBinding binding;
+class GeneratePass : AppCompatActivity() {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityGeneratePassBinding.inflate(getLayoutInflater());
-        View view = binding.getRoot();
-        setContentView(view);
-        vm = new ViewModelProvider(this).get(GeneratePassVM.class);
+    var auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-        vm.getPassWord().observe(this, s -> {
-            binding.passText.setText(s);
-        });
+    lateinit var security: Security
+    lateinit var vm: GeneratePassVM
+    private lateinit var binding: ActivityGeneratePassBinding
 
-        vm.getTotal().observe(this, s -> {
-            binding.total.setText(s);
-        });
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityGeneratePassBinding.inflate(
+            layoutInflater
+        )
+        val view: View = binding!!.root
+        setContentView(view)
+        vm = ViewModelProvider(this).get(GeneratePassVM::class.java)
 
-
-
-
-//TODO make an app for the ads on billboard etc...
-
-        try {
-            if (auth.getCurrentUser() == null) {
-                security = new Security(this, "NoPassWordForTheNewUser");
-            } else
-                security = new Security(this, "NOPASSWORDFF!!!!" + Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
-
-        } catch (NoSuchPaddingException |
-                 NoSuchAlgorithmException |
-                 KeyStoreException |
-                 CertificateException |
-                 IOException e) {
-            Toast.makeText(this, "Something Went Wrong : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            return;
+        vm.passWord.observe(this) { s: String? ->
+            binding.passText.setText(s)
         }
 
-        binding.copyPassEnc.setOnClickListener(v -> {
-            String copy = "Task Failed";
-            try {
-                if (binding.passText.getText() != null)
-                    copy = security.encryptData(Objects.requireNonNull(binding.passText.getText()).toString());
-            } catch (InvalidAlgorithmParameterException | KeyStoreException |
-                     NoSuchAlgorithmException | NoSuchProviderException |
-                     InvalidKeyException |
-                     IllegalBlockSizeException | BadPaddingException |
-                     InvalidKeySpecException | UnrecoverableEntryException e) {
-                Snackbar.make(v, Objects.requireNonNull(e.getMessage()), Snackbar.LENGTH_SHORT).show();
-                return;
+        vm.total.observe(this) { s: String? ->
+            binding.total.text = s
+        }
+
+
+        //TODO make an app for the ads on billboard etc...
+        security = if (auth.currentUser == null) {
+            Security(this, "NoPassWordForTheNewUser")
+        } else Security(
+            this,
+            ""
+        )
+
+
+        binding.copyPassEnc.setOnClickListener {
+
+            val copy: String? = security.encryptData(
+                binding.passText.text.toString()
+            ) {
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             }
+            if (copy != null) {
 
-            ClipboardManager clipboard = (ClipboardManager) GeneratePass.this.getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("Copied Text", copy);
-            clipboard.setPrimaryClip(clip);
-            //    Snackbar.make(v, "This button is for this release only \n it will be removed in beta ++ releases", 3000);
-            Toast.makeText(this, "copied", Toast.LENGTH_SHORT).show();
-            finish();
-        });
-        binding.regeneratePass.setOnClickListener(v -> {
-            vm.genNewPass();
-        });
 
-        binding.saveToCloud.setOnClickListener(v -> {
-
-            if (auth.getCurrentUser() == null) {
-                Toast.makeText(this, "Login First !", Toast.LENGTH_SHORT).show();
-                return;
+                val clipboard =
+                    this@GeneratePass.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("Copied Text", copy)
+                clipboard.setPrimaryClip(clip)
+                //    Snackbar.make(v, "This button is for this release only \n it will be removed in beta ++ releases", 3000);
+                Toast.makeText(this, "copied", Toast.LENGTH_SHORT).show()
+                finish()
             }
+        }
+        binding.regeneratePass.setOnClickListener { v: View? ->
+            vm.genNewPass()
+        }
 
-            AlertDialog alertDialog = new MaterialAlertDialogBuilder(this).setView(R.layout.custom_save_to_cloud).create();
-            alertDialog.setCanceledOnTouchOutside(false);
-            alertDialog.show();
+        binding.saveToCloud.setOnClickListener { v: View? ->
+            if (auth.currentUser == null) {
+                Toast.makeText(this, "Login First !", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val alertDialog =
+                MaterialAlertDialogBuilder(this).setView(R.layout.custom_save_to_cloud).create()
+            alertDialog.setCanceledOnTouchOutside(false)
+            alertDialog.show()
 
-            AppCompatEditText passTitleCustom, passUserIdCustom, passDescCustom, passSaveCustom;
-            FloatingActionButton passDoneCustom, exitButtonCustom;
-            MaterialButton newPassCustom;
-
-            newPassCustom = alertDialog.findViewById(R.id.newPassCustom);
-            passSaveCustom = alertDialog.findViewById(R.id.passSaveCustom);
+            val newPassCustom = alertDialog.findViewById<MaterialButton>(R.id.newPassCustom)
+            val passSaveCustom = alertDialog.findViewById<AppCompatEditText>(R.id.passSaveCustom)
 
             if (passSaveCustom != null) {
-                passSaveCustom.setVisibility(View.GONE);
+                passSaveCustom.visibility = View.GONE
             }
             if (newPassCustom != null) {
-                newPassCustom.setVisibility(View.GONE);
+                newPassCustom.visibility = View.GONE
             }
 
-            passTitleCustom = alertDialog.findViewById(R.id.passTitleCustom);
-            passUserIdCustom = alertDialog.findViewById(R.id.passUserIdCustom);
-            passDescCustom = alertDialog.findViewById(R.id.passDescCustom);
-            passDoneCustom = alertDialog.findViewById(R.id.passDoneCustom);
-            exitButtonCustom = alertDialog.findViewById(R.id.exitButtonCustom);
+            val passTitleCustom = alertDialog.findViewById<AppCompatEditText>(R.id.passTitleCustom)
+            val passUserIdCustom =
+                alertDialog.findViewById<AppCompatEditText>(R.id.passUserIdCustom)
+            val passDescCustom = alertDialog.findViewById<AppCompatEditText>(R.id.passDescCustom)
+            val passDoneCustom = alertDialog.findViewById<FloatingActionButton>(R.id.passDoneCustom)
+            val exitButtonCustom =
+                alertDialog.findViewById<FloatingActionButton>(R.id.exitButtonCustom)
 
-            if (exitButtonCustom != null) {
-                exitButtonCustom.setOnClickListener(v12 -> alertDialog.dismiss());
-            }
-
+            exitButtonCustom?.setOnClickListener { v12: View? -> alertDialog.dismiss() }
             if (passDoneCustom != null) {
-                passDoneCustom.setOnClickListener(v1 -> {
-                    if ((Objects.requireNonNull(Objects.requireNonNull(passTitleCustom).getText())).toString().isEmpty()) {
-                        Snackbar.make(v1, "Empty title", 2000).show();
+                passDoneCustom.setOnClickListener(View.OnClickListener { v1: View? ->
+                    if (Objects.requireNonNull<Editable?>(
+                            Objects.requireNonNull<AppCompatEditText?>(passTitleCustom).text
+                        )
+                            .toString().isEmpty()
+                    ) {
+                        Snackbar.make(v1!!, "Empty title", 2000).show()
                     } else {
-                        AlertDialog alertDialog1;
-                        alertDialog1 = new MaterialAlertDialogBuilder(this).setView(R.layout.loading_dilogue_2).create();
-                        alertDialog1.setCanceledOnTouchOutside(false);
-                        alertDialog1.setCancelable(false);
-                        alertDialog1.show();
-                        TextView t = alertDialog1.findViewById(R.id.loadingText);
+                        val alertDialog1 =
+                            MaterialAlertDialogBuilder(this).setView(R.layout.loading_dilogue_2)
+                                .create()
+                        alertDialog1.setCanceledOnTouchOutside(false)
+                        alertDialog1.setCancelable(false)
+                        alertDialog1.show()
+                        val t = alertDialog1.findViewById<TextView>(R.id.loadingText)
                         if (t != null) {
-                            t.setText("secure uploading");
+                            t.text = "secure uploading"
                         }
                         //   Snackbar.make(vie, "Uploading", 2000).show();
-                        String passTitle = passTitleCustom.getText().toString();
-                        String passDesc = "empty";
-                        String passUserId = "empty";
+                        val passTitle = passTitleCustom!!.text.toString()
+                        var passDesc = "empty"
+                        var passUserId = "empty"
                         if (passUserIdCustom != null) {
-                            passUserId = Objects.requireNonNull(passUserIdCustom.getText()).toString();
+                            passUserId = Objects.requireNonNull(passUserIdCustom.text).toString()
                         }
                         if (passDescCustom != null) {
-                            passDesc = Objects.requireNonNull(passDescCustom.getText()).toString();
+                            passDesc = Objects.requireNonNull(passDescCustom.text).toString()
                         }
 
-                        alertDialog.dismiss();
-                        String encPass = "";
-                        try {
-                            if (binding.passText.getText() != null)
-                                encPass = security.encryptData(binding.passText.getText().toString());
-                        } catch (InvalidAlgorithmParameterException | KeyStoreException |
-                                 NoSuchAlgorithmException | NoSuchProviderException |
-                                 InvalidKeyException |
-                                 IllegalBlockSizeException | BadPaddingException |
-                                 InvalidKeySpecException | UnrecoverableEntryException e) {
-                            Snackbar.make(v, Objects.requireNonNull(e.getMessage()), Snackbar.LENGTH_SHORT).show();
-                            alertDialog1.dismiss();
-                            return;
+                        alertDialog.dismiss()
+
+
+                        val encPass: String? = security.encryptData(
+                            binding.passText.text.toString()
+                        ) {
+                            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+                            alertDialog1.dismiss()
                         }
 
-                        if (encPass.isEmpty()) {
-                            Toast.makeText(this, "Error : Contact Support", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-                        if (auth.getCurrentUser() != null) {
-                            String id = String.valueOf(System.currentTimeMillis());
-                            DocumentReference dbPass =
+                        if (encPass != null) {
+                            val db = FirebaseFirestore.getInstance()
+                            if (auth.currentUser != null) {
+                                val id = System.currentTimeMillis().toString()
+                                val dbPass =
                                     db.collection("PasswordManager")
-                                            .document(auth.getCurrentUser().getUid())
-                                            .collection("YourPass").document(id + passTitle);
+                                        .document(auth.currentUser!!.uid)
+                                        .collection("YourPass").document(id + passTitle)
 
-                            Map<String, String> data = new HashMap<>();
-                            data.put("Title", passTitle);
-                            data.put("Desc", passDesc);
-                            data.put("id", id + passTitle);
-                            String finalEncPass = encPass;
-                            String finalPassUserId = passUserId;
-                            dbPass.set(data).addOnSuccessListener(documentReference -> {
-                                data.clear();
-                                data.put("pass", finalEncPass);
-                                data.put("UserId", finalPassUserId);
-                                db.collection("Passwords")
-                                        .document(auth.getCurrentUser().getUid())
-                                        .collection("YourPass").document(id + passTitle).set(data).addOnSuccessListener(unused -> {
-                                            Toast.makeText(GeneratePass.this, "Successfully completed", Toast.LENGTH_SHORT).show();
-                                            alertDialog1.dismiss();
-                                        }).addOnFailureListener(e -> {
-                                            alertDialog1.dismiss();
-                                            Toast.makeText(GeneratePass.this, "Something went wrong", Toast.LENGTH_SHORT).show();
-                                        });
-                            }).addOnFailureListener(e -> {
-                                Toast.makeText(GeneratePass.this, "Something went wrong", Toast.LENGTH_SHORT).show();
-                                alertDialog1.dismiss();
-                            });
-
-
-                        } else {
-                            Toast.makeText(this, "Login First", Toast.LENGTH_SHORT).show();
-                            alertDialog1.dismiss();
+                                val data: MutableMap<String, String> = HashMap()
+                                data["Title"] = passTitle
+                                data["Desc"] = passDesc
+                                data["id"] = id + passTitle
+                                val finalPassUserId = passUserId
+                                dbPass.set(data).addOnSuccessListener { documentReference: Void? ->
+                                    data.clear()
+                                    data["pass"] = encPass
+                                    data["UserId"] = finalPassUserId
+                                    db.collection("Passwords")
+                                        .document(auth.currentUser!!.uid)
+                                        .collection("YourPass").document(id + passTitle).set(data)
+                                        .addOnSuccessListener { unused: Void? ->
+                                            Toast.makeText(
+                                                this@GeneratePass,
+                                                "Successfully completed",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            alertDialog1.dismiss()
+                                        }.addOnFailureListener { e: Exception? ->
+                                            alertDialog1.dismiss()
+                                            Toast.makeText(
+                                                this@GeneratePass,
+                                                "Something went wrong",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                }.addOnFailureListener { e: Exception? ->
+                                    Toast.makeText(
+                                        this@GeneratePass,
+                                        "Something went wrong",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    alertDialog1.dismiss()
+                                }
+                            } else {
+                                Toast.makeText(this, "Login First", Toast.LENGTH_SHORT).show()
+                                alertDialog1.dismiss()
+                            }
                         }
-
-
                     }
-                });
+                })
             } else {
-                Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
-                alertDialog.dismiss();
+                Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show()
+                alertDialog.dismiss()
             }
+        }
 
-
-        });
-
-        binding.copyPass.setOnClickListener(v -> {
-            ClipboardManager clipboard = (ClipboardManager) GeneratePass.this.getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("Copied Text", binding.passText.getText());
-            clipboard.setPrimaryClip(clip);
-            Handler handler = new Handler();
-            binding.copyPass.setImageResource(R.drawable.icon_done_24);
+        binding.copyPass.setOnClickListener {
+            val clipboard =
+                this@GeneratePass.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Copied Text", binding.passText.text)
+            clipboard.setPrimaryClip(clip)
+            val handler = Handler()
+            binding.copyPass.setImageResource(R.drawable.icon_done_24)
             //    copyPass.setBackgroundResource(R.drawable.icon_done_24);
-            handler.postDelayed(() -> binding.copyPass.setImageResource(R.drawable.icon_copy_24), 1500);
-        });
+            handler.postDelayed(
+                { binding.copyPass.setImageResource(R.drawable.icon_copy_24) },
+                1500
+            )
+        }
 
 
-        String[] values = {"10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0"};
+        val values = arrayOf("10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0")
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item
-                , values);
-
-
-        binding.spinnerCapLetter.setAdapter(adapter);
-        binding.spinnerNumbers.setAdapter(adapter);
-        binding.spinnerSmallLetter.setAdapter(adapter);
-        binding.spinnerSpecialSym.setAdapter(adapter);
-        binding.spinnerCapLetter.setSelection(4);
-        binding.spinnerNumbers.setSelection(4);
-        binding.spinnerSmallLetter.setSelection(6);
-        binding.spinnerSpecialSym.setSelection(2);
+        val adapter = ArrayAdapter(
+            this,
+            androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+            values
+        )
 
 
-        binding.spinnerNumbers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                vm.setNumberslen(Byte.parseByte(values[position]));
+        binding.spinnerCapLetter.adapter = adapter
+        binding.spinnerNumbers.adapter = adapter
+        binding.spinnerSmallLetter.adapter = adapter
+        binding.spinnerSpecialSym.adapter = adapter
+        binding.spinnerCapLetter.setSelection(4)
+        binding.spinnerNumbers.setSelection(4)
+        binding.spinnerSmallLetter.setSelection(6)
+        binding.spinnerSpecialSym.setSelection(2)
 
-                vm.updateTotalText();
+
+        binding.spinnerNumbers.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View,
+                    position: Int,
+                    id: Long
+                ) {
+                    vm.numberslen = values[position].toByte()
+
+                    vm.updateTotalText()
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    vm.numberslen = 4.toByte()
+                    vm.updateTotalText()
+                }
             }
+        binding.spinnerCapLetter.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View,
+                    position: Int,
+                    id: Long
+                ) {
+                    vm.alphaCapLength = values[position].toByte()
+                    vm.updateTotalText()
+                }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                vm.setNumberslen((byte) 4);
-                vm.updateTotalText();
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    vm.alphaCapLength = 4.toByte()
+                    vm.updateTotalText()
+                }
             }
-        });
-        binding.spinnerCapLetter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)     {
-                vm.setAlphaCapLength(Byte.parseByte(values[position]));
-                vm.updateTotalText();
-            }
+        binding.spinnerSmallLetter.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View,
+                    position: Int,
+                    id: Long
+                ) {
+                    vm.alphaSmallLength = values[position].toByte()
+                    vm.updateTotalText()
+                }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                vm.setAlphaCapLength((byte) 4);
-                vm.updateTotalText();
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    vm.numberslen = 6.toByte()
+                    vm.updateTotalText()
+                }
             }
-        });
-        binding.spinnerSmallLetter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                vm.setAlphaSmallLength(Byte.parseByte(values[position]));
-                vm.updateTotalText();
-            }
+        binding.spinnerSpecialSym.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View,
+                    position: Int,
+                    id: Long
+                ) {
+                    vm.specialSymbol = values[position].toByte()
+                    vm.updateTotalText()
+                }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                vm.setNumberslen((byte) 6);
-                vm.updateTotalText();
-            }
-        });
-        binding.spinnerSpecialSym.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                vm.setSpecialSymbol(Byte.parseByte(values[position]));
-                vm.updateTotalText();
-            }
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    vm.numberslen = 2.toByte()
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                vm.setNumberslen((byte) 2);
-                ;
-                vm.updateTotalText();
+                    vm.updateTotalText()
+                }
             }
-        });
-        binding.customSetSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        binding.customSetSwitch.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
             if (isChecked) {
-                binding.customSettings.setVisibility(View.VISIBLE);
-                vm.setNumberslen(Byte.parseByte((String) binding.spinnerNumbers.getSelectedItem()));
-                vm.setAlphaCapLength(Byte.parseByte((String) binding.spinnerCapLetter.getSelectedItem()));
-                vm.setAlphaSmallLength(Byte.parseByte((String) binding.spinnerSmallLetter.getSelectedItem()));
-                vm.setSpecialSymbol(Byte.parseByte((String) binding.spinnerSpecialSym.getSelectedItem()));
+                binding.customSettings.visibility = View.VISIBLE
+                vm.numberslen = (binding.spinnerNumbers.selectedItem as String).toByte()
+                vm.alphaCapLength = (binding.spinnerCapLetter.selectedItem as String).toByte()
+                vm.alphaSmallLength =
+                    (binding.spinnerSmallLetter.selectedItem as String).toByte()
+                vm.specialSymbol = (binding.spinnerSpecialSym.selectedItem as String).toByte()
             } else {
-                binding.customSettings.setVisibility(View.GONE);
-                vm.setNumberslen((byte) 4);
-                vm.setAlphaCapLength((byte) 4);
-                vm.setAlphaSmallLength((byte) 6);
-                vm.setSpecialSymbol((byte) 2);
-                vm.setPassLength((byte) 16);
+                binding.customSettings.visibility = View.GONE
+                vm.numberslen = 4.toByte()
+                vm.alphaCapLength = 4.toByte()
+                vm.alphaSmallLength = 6.toByte()
+                vm.specialSymbol = 2.toByte()
+                vm.passLength = 16.toByte()
             }
-        });
+        }
     }
-
 }

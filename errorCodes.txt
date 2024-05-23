@@ -1,0 +1,11 @@
+code 39 -> InvalidKeyException
+
+code 50 -> UnrecoverableEntryException
+
+code 100 -> KeyStoreException
+
+code 101 -> NoSuchAlgorithmException
+
+code 129 -> BadPaddingException
+
+code 130 -> IllegalBlockSizeException

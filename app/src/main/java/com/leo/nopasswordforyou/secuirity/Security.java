@@ -27,6 +27,7 @@ import android.os.Environment;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -46,7 +47,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -54,18 +54,20 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 public class Security {
 
@@ -80,11 +82,29 @@ public class Security {
     String alias;
 
 
-    public Security(Context context, String alias) throws NoSuchPaddingException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
+    public Security(Context context, String alias) {
         this.context = context;
-        cipher = Cipher.getInstance(TRANSFORMATION);
-        keyStore = KeyStore.getInstance(KEYSTORE);
-        keyStore.load(null);
+        try {
+            cipher = Cipher.getInstance(TRANSFORMATION);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            Toast.makeText(context, "Error : Contact Support", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            keyStore = KeyStore.getInstance(KEYSTORE);
+        } catch (KeyStoreException e) {
+            Toast.makeText(context, "Error : Device problem , contact support", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            keyStore.load(null);
+        } catch (IOException e) {
+            Toast.makeText(context, "something went unusual", Toast.LENGTH_SHORT).show();
+            return;
+        } catch (NoSuchAlgorithmException | CertificateException e) {
+            Toast.makeText(context, "Error : Contact Support team", Toast.LENGTH_SHORT).show();
+            return;
+        }
         this.alias = alias;
 
     }
@@ -115,34 +135,50 @@ public class Security {
         return new JcaX509CertificateConverter().getCertificate(certHolder);
     }
 
-    public String encryptData(String pass)
-            throws InvalidAlgorithmParameterException,
-            KeyStoreException,
-            NoSuchAlgorithmException,
-            NoSuchProviderException,
-            InvalidKeyException,
-            IllegalBlockSizeException,
-            BadPaddingException,
-            UnrecoverableEntryException,
-            InvalidKeySpecException {
-        String encPass;
-
-        cipher.init(Cipher.ENCRYPT_MODE, getKey(Cipher.ENCRYPT_MODE));
-        encPass = new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
+    @Nullable
+    public String encryptData(String pass, Function1<String, Unit> error) {
+        try {
+            cipher.init(Cipher.ENCRYPT_MODE, getKey(Cipher.ENCRYPT_MODE));
+            return new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
+        } catch (InvalidKeyException e) {
+            error.invoke("Incorrect Key Chosen ! code 39");
+        } catch (KeyStoreException e) {
+            error.invoke("error code 100");
+        } catch (UnrecoverableEntryException e) {
+            error.invoke("Import key again ! code 50");
+        } catch (NoSuchAlgorithmException e) {
+            error.invoke("error code 101");
+        } catch (BadPaddingException e) {
+            error.invoke("Wrong Key or Incorrect Data , code 129");
+        } catch (IllegalBlockSizeException e) {
+            error.invoke("Wrong Key or Incorrect Data , code 130");
+        }
         Log.d("tag", "in encryptData try block ");
-        return encPass;
+        return null;
     }
 
-    public String decryptData(String pass) throws
-            InvalidKeyException,
-            IllegalBlockSizeException,
-            BadPaddingException,
-            NoSuchAlgorithmException,
-            KeyStoreException,
-            UnrecoverableEntryException {
+    @Nullable
+    public String decryptData(String pass, Function1<String, Unit> error) {
 
-        cipher.init(Cipher.DECRYPT_MODE, getKey(Cipher.DECRYPT_MODE));
-        return new String(cipher.doFinal(Base64.decode(pass, Base64.DEFAULT)), StandardCharsets.UTF_8);
+        try {
+            cipher.init(Cipher.DECRYPT_MODE, getKey(Cipher.DECRYPT_MODE));
+            return new String(cipher.doFinal(Base64.decode(pass, Base64.DEFAULT)), StandardCharsets.UTF_8);
+
+        } catch (InvalidKeyException e) {
+            error.invoke("Incorrect Key Chosen ! code 39");
+        } catch (KeyStoreException e) {
+            error.invoke("error code 100");
+        } catch (UnrecoverableEntryException e) {
+            error.invoke("Import key again ! code 50");
+        } catch (NoSuchAlgorithmException e) {
+            error.invoke("error code 101");
+        } catch (BadPaddingException e) {
+            error.invoke("Wrong Key or Incorrect Data , code 129");
+        } catch (IllegalBlockSizeException e) {
+            error.invoke("Wrong Key or Incorrect Data , code 130");
+        }
+
+        return null;
     }
 
     private Key getKey(int mode) throws

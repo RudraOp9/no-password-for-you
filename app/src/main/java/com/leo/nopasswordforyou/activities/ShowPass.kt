@@ -18,6 +18,7 @@
  */
 package com.leo.nopasswordforyou.activities
 
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.DialogInterface
@@ -29,6 +30,7 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
@@ -55,6 +57,7 @@ import com.leo.nopasswordforyou.databinding.ActivityShowPassBinding
 import com.leo.nopasswordforyou.helper.ItemClickListner
 import com.leo.nopasswordforyou.helper.PassAdapter
 import com.leo.nopasswordforyou.helper.PassAdapterData
+import com.leo.nopasswordforyou.helper.checkExternalWritePer
 import com.leo.nopasswordforyou.secuirity.Security
 import java.io.IOException
 import java.security.InvalidAlgorithmParameterException
@@ -82,6 +85,14 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
     lateinit var keySettingNewKey: AlertDialog
 
     lateinit var binding: ActivityShowPassBinding
+    val requestPermissionLauncher =
+        this.registerForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { _: Boolean ->
+
+        }
+
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -150,65 +161,32 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
                 keySettingNewKey.show()
                 val text = keySettingNewKey.findViewById<TextInputEditText>(R.id.alias)
                 val doneButton = keySettingNewKey.findViewById<AppCompatButton>(R.id.addKey)
+                val infoText = keySettingNewKey.findViewById<TextView>(R.id.infoText)
 
+                var exit = false
                 doneButton?.setOnClickListener {
-                    if (text != null) {
+                    if (exit) {
+                        keySettingNewKey.dismiss()
+                        keySetting.dismiss()
+                    } else if (text != null && checkExternalWritePer(
+                            this,
+                            this,
+                            requestPermissionLauncher
+                        )
+                    ) {
                         if (text.text.toString().isNotEmpty()) {
-                            try {
-                                val security = Security(
-                                    this, text.text.toString()
-                                )
-                                val result = security.newKey()
-                                if (result.equals("done")) {
-                                    keySettingNewKey.dismiss()
-                                    keySetting.dismiss()
-                                }
-                                Toast.makeText(this, result, Toast.LENGTH_SHORT).show()
+                            val security = Security(
+                                this, text.text.toString()
+                            )
+                            val result = security.newKey()
+                            if (result.equals("done")) {
+                                doneButton.text = "Exit"
+                                exit = true
+                                infoText?.text =
+                                    "An new Key with the alias : ${text.text.toString()} has been created and has been saved to \n 'Download/noPassWordForYou/${text.text.toString()}.ppk' \n Never Share the file to someone else and keep it private.\n why ? see Help section for More Info !"
 
-                            } catch (e: NoSuchPaddingException) {
-                                Toast.makeText(
-                                    this,
-                                    "Failed : " + e.localizedMessage,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                //Todo handle error
-                            } catch (e: NoSuchAlgorithmException) {
-                                Toast.makeText(
-                                    this,
-                                    "Failed : " + e.localizedMessage,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } catch (e: KeyStoreException) {
-                                Toast.makeText(
-                                    this,
-                                    "Failed : " + e.localizedMessage,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } catch (e: CertificateException) {
-                                Toast.makeText(
-                                    this,
-                                    "Failed : " + e.localizedMessage,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } catch (e: InvalidAlgorithmParameterException) {
-                                Toast.makeText(
-                                    this,
-                                    "Failed : " + e.localizedMessage,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } catch (e: IOException) {
-                                Toast.makeText(
-                                    this,
-                                    "Failed : " + e.localizedMessage,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } catch (e: Exception) {
-                                Toast.makeText(
-                                    this,
-                                    "Failed : " + e.localizedMessage,
-                                    Toast.LENGTH_SHORT
-                                ).show()
                             }
+                            Toast.makeText(this, result, Toast.LENGTH_SHORT).show()
                         } else Toast.makeText(this, "empty alias", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -261,111 +239,15 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
             } else {
                 val ToDecode = documentSnapshot["pass"] as String?
                 val UserId = documentSnapshot["UserId"] as String?
-                var decodedData = "No Key Added"
-                try {
-                    val security = Security(
-                        this,
-                        "NOPASSWORDFF!!!!" + (FirebaseAuth.getInstance().currentUser?.uid)
-                    )
-                    decodedData = security.decryptData(ToDecode)
-                } catch (e: NoSuchPaddingException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: NoSuchAlgorithmException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: KeyStoreException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: CertificateException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: IOException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: InvalidAlgorithmParameterException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: IllegalBlockSizeException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: UnrecoverableEntryException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: BadPaddingException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: NoSuchProviderException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: InvalidKeyException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
-                } catch (e: InvalidKeySpecException) {
-                    Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_LONG).show()
-                    Log.d(
-                        "tag",
-                        Objects.requireNonNull(e.cause)
-                            .toString() + " and " + e.stackTrace.contentToString()
-                    )
-                    return@addOnSuccessListener
+                val security = Security(
+                    this,
+                    "NOPASSWORDFF!!!!" + (FirebaseAuth.getInstance().currentUser?.uid)
+                )
+                val decodedData = security.decryptData(ToDecode) {
+                    Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
                 }
 
+                if (decodedData != null) {
                 Log.d("tag", decodedData)
 
                 val alertDialog1 =
@@ -555,6 +437,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
                 }
                 if (passUserIdShowCustom != null) {
                     passUserIdShowCustom.text = UserId
+                }
                 }
             }
         }.addOnFailureListener { e: Exception ->
