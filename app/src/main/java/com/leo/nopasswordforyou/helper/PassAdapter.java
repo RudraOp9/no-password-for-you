@@ -84,7 +84,7 @@ public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> 
         @Override
         public void onClick(View v) {
             if (clickListner != null){
-                clickListner.onClick(v, listData.get(getAdapterPosition()).getId(), listData.get(getAdapterPosition()).getTitle(), listData.get(getAdapterPosition()).getDescription());
+                clickListner.onClick(v, listData.get(getAdapterPosition()).getId(), listData.get(getAdapterPosition()).getTitle(), listData.get(getAdapterPosition()).getDescription(), listData.get(getAdapterPosition()).getAlias());
             }
         }
     }

@@ -71,8 +71,8 @@
         android:singleLine="true"
         android:visibility="visible"
         app:layout_constraintEnd_toStartOf="@+id/newPassCustom"
-        app:layout_constraintStart_toStartOf="@+id/passDescCustom"
-        app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
+        app:layout_constraintStart_toStartOf="@+id/selectKey"
+        app:layout_constraintTop_toBottomOf="@+id/selectKey" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/newPassCustom"
@@ -87,8 +87,43 @@
         android:textColor="@color/black"
         app:cornerRadius="5dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/passSaveCustom"
-        app:layout_constraintTop_toBottomOf="@+id/passDescCustom" />
+        app:layout_constraintStart_toEndOf="@+id/selectKey"
+        app:layout_constraintTop_toBottomOf="@+id/selectKey" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/selectKey"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="@+id/passDescCustom"
+        app:layout_constraintStart_toStartOf="@+id/passDescCustom"
+        app:layout_constraintTop_toBottomOf="@+id/passDescCustom">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/open_sans"
+            android:text="Select Key"
+
+            android:textSize="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:id="@+id/spinnerKeySelect"
+            style="@style/Widget.AppCompat.TextView.SpinnerItem"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_marginEnd="20dp"
+            android:popupBackground="@drawable/spinner_dropdown_background"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/exitButtonCustom"
@@ -102,7 +137,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/passDoneCustom"
-        app:layout_constraintTop_toBottomOf="@+id/passSaveCustom" />
+        app:layout_constraintTop_toBottomOf="@+id/selectKey" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/passDoneCustom"
@@ -115,17 +150,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/exitButtonCustom"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passSaveCustom" />
+        app:layout_constraintTop_toBottomOf="@+id/selectKey" />
+
+
     <!--<button
-        android:id="@+id/saveToClou"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:contentDescription="Save To Cloud"
-        android:padding="15dp"
-        android:text="Done"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appCompatEditText2" />-->
+    android:id="@+id/saveToClou"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:contentDescription="Save To Cloud"
+    android:padding="15dp"
+    android:text="Done"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/appCompatEditText2" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

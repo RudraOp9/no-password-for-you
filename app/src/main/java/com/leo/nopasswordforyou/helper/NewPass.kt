@@ -1,5 +1,6 @@
 package com.leo.nopasswordforyou.helper
 
+import java.util.Arrays
 import java.util.Collections
 
 class NewPass {
@@ -92,8 +93,6 @@ class NewPass {
             password.add(capitalLetter[(Math.random() * 25).toInt()])
         }
         password.shuffle()
-        val pass = StringBuilder()
-        for (a in password) pass.append(a)
-        return pass.toString()
+        return password.toArray().contentToString()
     }
 }

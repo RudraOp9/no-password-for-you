@@ -58,7 +58,9 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 
 import javax.annotation.Nullable;
 import javax.crypto.BadPaddingException;
@@ -136,10 +138,14 @@ public class Security {
     }
 
     @Nullable
-    public String encryptData(String pass, Function1<String, Unit> error) {
+    public String encryptData(String pass, String alias, Function1<String, Unit> error) {
         try {
-            cipher.init(Cipher.ENCRYPT_MODE, getKey(Cipher.ENCRYPT_MODE));
-            return new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
+            Key key = getKey(Cipher.ENCRYPT_MODE, alias, error);
+            if (key != null) {
+                cipher.init(Cipher.ENCRYPT_MODE, key);
+                return new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
+            } else return null;
+
         } catch (InvalidKeyException e) {
             error.invoke("Incorrect Key Chosen ! code 39");
         } catch (KeyStoreException e) {
@@ -158,11 +164,15 @@ public class Security {
     }
 
     @Nullable
-    public String decryptData(String pass, Function1<String, Unit> error) {
+    public String decryptData(String pass, String alias, Function1<String, Unit> error) {
 
         try {
-            cipher.init(Cipher.DECRYPT_MODE, getKey(Cipher.DECRYPT_MODE));
-            return new String(cipher.doFinal(Base64.decode(pass, Base64.DEFAULT)), StandardCharsets.UTF_8);
+            Key key = getKey(Cipher.DECRYPT_MODE, alias, error);
+            if (key != null) {
+                cipher.init(Cipher.DECRYPT_MODE, key);
+                return new String(cipher.doFinal(Base64.decode(pass, Base64.DEFAULT)), StandardCharsets.UTF_8);
+            } else return null;
+
 
         } catch (InvalidKeyException e) {
             error.invoke("Incorrect Key Chosen ! code 39");
@@ -181,7 +191,8 @@ public class Security {
         return null;
     }
 
-    private Key getKey(int mode) throws
+    @Nullable
+    private Key getKey(int mode, String alias, Function1<String, Unit> error) throws
             RuntimeException,
             KeyStoreException,
             NoSuchAlgorithmException,
@@ -193,7 +204,10 @@ public class Security {
                 Log.d("tag", " encrypting contains the key");
                 return keyStore.getCertificate(alias).getPublicKey();
 
-            } else return null;
+            } else {
+                error.invoke("Import key again");
+                return null;
+            }
         } else {
             if (keyStore.containsAlias(alias)) {
                 Log.d("tag", "key store decrypting contains the key");
@@ -206,7 +220,7 @@ public class Security {
 
     }
 
-    public String newKey() {
+    public String newKey(String alias) {
         KeyPairGenerator keyPairGenerator;
         try {
             keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
@@ -228,9 +242,20 @@ public class Security {
         X509Certificate cert;
         try {
             cert = generateSelfSignedCertificate(keyPair);
-            keyStore.setKeyEntry(alias + "private", keyPair.getPrivate(), null, new Certificate[]{cert});
+            keyStore.setKeyEntry(alias
+                    , keyPair.getPrivate(), null, new Certificate[]{cert});
         } catch (Exception e) {
             return "Error" + e.getLocalizedMessage();
+        }
+        try {
+
+            for (Enumeration<String> e = keyStore.aliases(); e.hasMoreElements(); ) {
+                Log.d("TAG", "newKey:" + e.nextElement());
+            }
+
+
+        } catch (KeyStoreException e) {
+            throw new RuntimeException(e);
         }
 
 

@@ -28,10 +28,12 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CompoundButton
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatEditText
+import androidx.appcompat.widget.AppCompatSpinner
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -43,9 +45,11 @@ import com.leo.nopasswordforyou.R
 import com.leo.nopasswordforyou.databinding.ActivityGeneratePassBinding
 import com.leo.nopasswordforyou.secuirity.Security
 import com.leo.nopasswordforyou.viewmodel.GeneratePassVM
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.Objects
 
 
+@AndroidEntryPoint
 class GeneratePass : AppCompatActivity() {
 
     var auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -59,10 +63,10 @@ class GeneratePass : AppCompatActivity() {
         binding = ActivityGeneratePassBinding.inflate(
             layoutInflater
         )
-        val view: View = binding!!.root
+        val view: View = binding.root
         setContentView(view)
         vm = ViewModelProvider(this).get(GeneratePassVM::class.java)
-
+        vm.getAliases()
         vm.passWord.observe(this) { s: String? ->
             binding.passText.setText(s)
         }
@@ -83,28 +87,28 @@ class GeneratePass : AppCompatActivity() {
 
         binding.copyPassEnc.setOnClickListener {
 
-            val copy: String? = security.encryptData(
-                binding.passText.text.toString()
-            ) {
-                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-            }
-            if (copy != null) {
+            /* val copy: String? = security.encryptData(
+                 binding.passText.text.toString()
+             ) {
+                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+             }
+             if (copy != null) {
 
 
-                val clipboard =
-                    this@GeneratePass.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = ClipData.newPlainText("Copied Text", copy)
-                clipboard.setPrimaryClip(clip)
-                //    Snackbar.make(v, "This button is for this release only \n it will be removed in beta ++ releases", 3000);
-                Toast.makeText(this, "copied", Toast.LENGTH_SHORT).show()
-                finish()
-            }
+                 val clipboard =
+                     this@GeneratePass.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                 val clip = ClipData.newPlainText("Copied Text", copy)
+                 clipboard.setPrimaryClip(clip)
+                 //    Snackbar.make(v, "This button is for this release only \n it will be removed in beta ++ releases", 3000);
+                 Toast.makeText(this, "copied", Toast.LENGTH_SHORT).show()
+                 finish()
+             }*/
         }
         binding.regeneratePass.setOnClickListener { v: View? ->
             vm.genNewPass()
         }
 
-        binding.saveToCloud.setOnClickListener { v: View? ->
+        binding.saveToCloud.setOnClickListener {
             if (auth.currentUser == null) {
                 Toast.makeText(this, "Login First !", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -116,10 +120,48 @@ class GeneratePass : AppCompatActivity() {
 
             val newPassCustom = alertDialog.findViewById<MaterialButton>(R.id.newPassCustom)
             val passSaveCustom = alertDialog.findViewById<AppCompatEditText>(R.id.passSaveCustom)
+            val spinnerKeySelect =
+                alertDialog.findViewById<AppCompatSpinner>(R.id.spinnerKeySelect);
+
+
+
+            if (vm.aliases.isEmpty()) {
+                Toast.makeText(this, "Create an key first", Toast.LENGTH_SHORT).show()
+                alertDialog.dismiss()
+            }
+            val adapter = ArrayAdapter(
+                this,
+                androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
+                vm.aliases
+            )
+            if (spinnerKeySelect != null) {
+                spinnerKeySelect.adapter = adapter
+                spinnerKeySelect.onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>?,
+                            view: View?,
+                            position: Int,
+                            id: Long
+                        ) {
+                            vm.selectedAlias = position
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+                            vm.selectedAlias = 0
+
+                        }
+                    }
+
+            }
+
+
+
 
             if (passSaveCustom != null) {
                 passSaveCustom.visibility = View.GONE
             }
+
             if (newPassCustom != null) {
                 newPassCustom.visibility = View.GONE
             }
@@ -131,6 +173,9 @@ class GeneratePass : AppCompatActivity() {
             val passDoneCustom = alertDialog.findViewById<FloatingActionButton>(R.id.passDoneCustom)
             val exitButtonCustom =
                 alertDialog.findViewById<FloatingActionButton>(R.id.exitButtonCustom)
+
+
+
 
             exitButtonCustom?.setOnClickListener { v12: View? -> alertDialog.dismiss() }
             if (passDoneCustom != null) {
@@ -167,13 +212,14 @@ class GeneratePass : AppCompatActivity() {
 
 
                         val encPass: String? = security.encryptData(
-                            binding.passText.text.toString()
+                            binding.passText.text.toString(), vm.aliases[vm.selectedAlias]
                         ) {
                             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
                             alertDialog1.dismiss()
                         }
 
                         if (encPass != null) {
+                            val alias = vm.aliases[vm.selectedAlias]
                             val db = FirebaseFirestore.getInstance()
                             if (auth.currentUser != null) {
                                 val id = System.currentTimeMillis().toString()
@@ -186,6 +232,7 @@ class GeneratePass : AppCompatActivity() {
                                 data["Title"] = passTitle
                                 data["Desc"] = passDesc
                                 data["id"] = id + passTitle
+                                data["alias"] = alias
                                 val finalPassUserId = passUserId
                                 dbPass.set(data).addOnSuccessListener { documentReference: Void? ->
                                     data.clear()
@@ -194,7 +241,19 @@ class GeneratePass : AppCompatActivity() {
                                     db.collection("Passwords")
                                         .document(auth.currentUser!!.uid)
                                         .collection("YourPass").document(id + passTitle).set(data)
-                                        .addOnSuccessListener { unused: Void? ->
+                                        .addOnSuccessListener {
+                                            vm.putPassList(
+                                                passTitle,
+                                                passDesc,
+                                                id + passTitle,
+                                                alias
+                                            )
+                                            vm.putPasses(
+                                                id + passTitle,
+                                                finalPassUserId,
+                                                encPass,
+                                                alias
+                                            )
                                             Toast.makeText(
                                                 this@GeneratePass,
                                                 "Successfully completed",

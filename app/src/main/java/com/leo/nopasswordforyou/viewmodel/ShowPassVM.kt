@@ -20,7 +20,73 @@
 package com.leo.nopasswordforyou.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.leo.nopasswordforyou.database.alias.AliasDao
+import com.leo.nopasswordforyou.database.alias.AliasEntity
+import com.leo.nopasswordforyou.database.passes.PassesDao
+import com.leo.nopasswordforyou.database.passes.PassesEntity
+import com.leo.nopasswordforyou.database.passlist.PassListDao
+import com.leo.nopasswordforyou.database.passlist.PassListEntity
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class ShowPassVM : ViewModel() {
+@HiltViewModel
+class ShowPassVM @Inject constructor(
+    val passesDao: PassesDao,
+    val passListDao: PassListDao,
+    val aliasDao: AliasDao
+) :
+    ViewModel() {
+    fun getPassList(results: (ArrayList<PassListEntity>) -> Unit) {
+        viewModelScope.launch {
+            val k: ArrayList<PassListEntity> =
+                passListDao.getPassList() as ArrayList<PassListEntity>
+            results.invoke(k)
+        }
+    }
+
+    fun setAlias(alias: String) {
+        viewModelScope.launch {
+            aliasDao.insertNewAlias(AliasEntity(alias = alias))
+        }
+    }
+
+
+    fun getPass(keyId: String, results: (PassesEntity) -> Unit) {
+        viewModelScope.launch {
+            results.invoke(passesDao.getPass(keyId))
+        }
+    }
+
+
+    fun updatePass(passesEntity: PassesEntity) {
+        viewModelScope.launch {
+            passesDao.updatePass(passesEntity)
+        }
+    }
+
+    fun deletePass(keyId: String) {
+        viewModelScope.launch {
+            passesDao.deletePass(keyId)
+        }
+
+    }
+
+    fun deletePassList(keyId: String) {
+        viewModelScope.launch {
+            passListDao.deletePassList(keyId)
+        }
+    }
+
+    fun updatePassList(passListEntity: PassListEntity) {
+        viewModelScope.launch {
+            passListDao.updatePassList(passListEntity)
+        }
+    }
+
+
+
 
 }
