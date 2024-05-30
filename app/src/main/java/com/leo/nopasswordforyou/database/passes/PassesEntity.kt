@@ -29,4 +29,6 @@ data class PassesEntity(
     val userId: String,
     val password: String,
     val alias: String
-)
+) {
+    constructor() : this("", "", "", "")
+}

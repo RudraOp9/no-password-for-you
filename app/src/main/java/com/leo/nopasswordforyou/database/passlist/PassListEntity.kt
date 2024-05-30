@@ -31,4 +31,8 @@ data class PassListEntity(
     val desc: String,
     val alias: String,
     val lastModify: Long
-)
+) {
+    constructor() : this("", "", "", "", 0L)
+}
+
+

@@ -22,27 +22,24 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CompoundButton
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatEditText
-import androidx.appcompat.widget.AppCompatSpinner
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.leo.nopasswordforyou.R
+import com.leo.nopasswordforyou.database.passes.PassesEntity
+import com.leo.nopasswordforyou.database.passlist.PassListEntity
 import com.leo.nopasswordforyou.databinding.ActivityGeneratePassBinding
+import com.leo.nopasswordforyou.databinding.CustomSaveToCloudBinding
 import com.leo.nopasswordforyou.secuirity.Security
 import com.leo.nopasswordforyou.viewmodel.GeneratePassVM
 import dagger.hilt.android.AndroidEntryPoint
@@ -113,16 +110,12 @@ class GeneratePass : AppCompatActivity() {
                 Toast.makeText(this, "Login First !", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            val csB = CustomSaveToCloudBinding.inflate(layoutInflater)
             val alertDialog =
-                MaterialAlertDialogBuilder(this).setView(R.layout.custom_save_to_cloud).create()
+                MaterialAlertDialogBuilder(this).setView(csB.root).create()
             alertDialog.setCanceledOnTouchOutside(false)
             alertDialog.show()
-
-            val newPassCustom = alertDialog.findViewById<MaterialButton>(R.id.newPassCustom)
-            val passSaveCustom = alertDialog.findViewById<AppCompatEditText>(R.id.passSaveCustom)
-            val spinnerKeySelect =
-                alertDialog.findViewById<AppCompatSpinner>(R.id.spinnerKeySelect);
-
 
 
             if (vm.aliases.isEmpty()) {
@@ -134,158 +127,133 @@ class GeneratePass : AppCompatActivity() {
                 androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
                 vm.aliases
             )
-            if (spinnerKeySelect != null) {
-                spinnerKeySelect.adapter = adapter
-                spinnerKeySelect.onItemSelectedListener =
-                    object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(
-                            parent: AdapterView<*>?,
-                            view: View?,
-                            position: Int,
-                            id: Long
-                        ) {
-                            vm.selectedAlias = position
-                        }
-
-                        override fun onNothingSelected(parent: AdapterView<*>?) {
-                            vm.selectedAlias = 0
-
-                        }
+            csB.spinnerKeySelect.adapter = adapter
+            csB.spinnerKeySelect.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        vm.selectedAlias = position
                     }
 
-            }
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+                        vm.selectedAlias = 0
+
+                    }
+                }
 
 
 
 
-            if (passSaveCustom != null) {
-                passSaveCustom.visibility = View.GONE
-            }
+            csB.passSaveCustom.visibility = View.GONE
 
-            if (newPassCustom != null) {
-                newPassCustom.visibility = View.GONE
-            }
-
-            val passTitleCustom = alertDialog.findViewById<AppCompatEditText>(R.id.passTitleCustom)
-            val passUserIdCustom =
-                alertDialog.findViewById<AppCompatEditText>(R.id.passUserIdCustom)
-            val passDescCustom = alertDialog.findViewById<AppCompatEditText>(R.id.passDescCustom)
-            val passDoneCustom = alertDialog.findViewById<FloatingActionButton>(R.id.passDoneCustom)
-            val exitButtonCustom =
-                alertDialog.findViewById<FloatingActionButton>(R.id.exitButtonCustom)
+            csB.newPassCustom.visibility = View.GONE
 
 
 
 
-            exitButtonCustom?.setOnClickListener { v12: View? -> alertDialog.dismiss() }
-            if (passDoneCustom != null) {
-                passDoneCustom.setOnClickListener(View.OnClickListener { v1: View? ->
-                    if (Objects.requireNonNull<Editable?>(
-                            Objects.requireNonNull<AppCompatEditText?>(passTitleCustom).text
-                        )
-                            .toString().isEmpty()
+            csB.exitButtonCustom.setOnClickListener { v12: View? -> alertDialog.dismiss() }
+            csB.passDoneCustom.setOnClickListener { v1: View? ->
+                if (Objects.requireNonNull<Editable?>(
+                        Objects.requireNonNull(csB.passTitleCustom).text
+                    )
+                        .toString().isEmpty()
+                ) {
+                    Snackbar.make(v1!!, "Empty title", 2000).show()
+                } else {
+                    val alertDialog1 =
+                        MaterialAlertDialogBuilder(this).setView(R.layout.loading_dilogue_2)
+                            .create()
+                    alertDialog1.setCanceledOnTouchOutside(false)
+                    alertDialog1.setCancelable(false)
+                    alertDialog1.show()
+                    val t = alertDialog1.findViewById<TextView>(R.id.loadingText)
+                    if (t != null) {
+                        t.text = "secure uploading"
+                    }
+                    //   Snackbar.make(vie, "Uploading", 2000).show();
+                    val passTitle = csB.passTitleCustom.text.toString()
+                    val passUserId: String =
+                        Objects.requireNonNull(csB.passUserIdCustom.text).toString()
+                    val passDesc: String =
+                        Objects.requireNonNull(csB.passDescCustom.text).toString()
+
+                    alertDialog.dismiss()
+
+
+                    val encPass: String? = security.encryptData(
+                        binding.passText.text.toString(), vm.aliases[vm.selectedAlias]
                     ) {
-                        Snackbar.make(v1!!, "Empty title", 2000).show()
-                    } else {
-                        val alertDialog1 =
-                            MaterialAlertDialogBuilder(this).setView(R.layout.loading_dilogue_2)
-                                .create()
-                        alertDialog1.setCanceledOnTouchOutside(false)
-                        alertDialog1.setCancelable(false)
-                        alertDialog1.show()
-                        val t = alertDialog1.findViewById<TextView>(R.id.loadingText)
-                        if (t != null) {
-                            t.text = "secure uploading"
-                        }
-                        //   Snackbar.make(vie, "Uploading", 2000).show();
-                        val passTitle = passTitleCustom!!.text.toString()
-                        var passDesc = "empty"
-                        var passUserId = "empty"
-                        if (passUserIdCustom != null) {
-                            passUserId = Objects.requireNonNull(passUserIdCustom.text).toString()
-                        }
-                        if (passDescCustom != null) {
-                            passDesc = Objects.requireNonNull(passDescCustom.text).toString()
-                        }
+                        Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+                        alertDialog1.dismiss()
+                    }
 
-                        alertDialog.dismiss()
+                    if (encPass != null) {
+                        val alias = vm.aliases[vm.selectedAlias]
+                        val db = FirebaseFirestore.getInstance()
+                        if (auth.currentUser != null) {
+                            val modify = System.currentTimeMillis()
+                            val id = modify.toString()
+                            val dbPass =
+                                db.collection("PasswordManager")
+                                    .document(auth.currentUser!!.uid)
+                                    .collection("YourPass").document(id + passTitle)
 
+                            val data2 =
+                                PassListEntity(id + passTitle, passTitle, passDesc, alias, modify)
 
-                        val encPass: String? = security.encryptData(
-                            binding.passText.text.toString(), vm.aliases[vm.selectedAlias]
-                        ) {
-                            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-                            alertDialog1.dismiss()
-                        }
+                            dbPass.set(data2).addOnSuccessListener {
+                                val passData =
+                                    PassesEntity(id + passTitle, passUserId, encPass, alias)
 
-                        if (encPass != null) {
-                            val alias = vm.aliases[vm.selectedAlias]
-                            val db = FirebaseFirestore.getInstance()
-                            if (auth.currentUser != null) {
-                                val id = System.currentTimeMillis().toString()
-                                val dbPass =
-                                    db.collection("PasswordManager")
-                                        .document(auth.currentUser!!.uid)
-                                        .collection("YourPass").document(id + passTitle)
-
-                                val data: MutableMap<String, String> = HashMap()
-                                data["Title"] = passTitle
-                                data["Desc"] = passDesc
-                                data["id"] = id + passTitle
-                                data["alias"] = alias
-                                val finalPassUserId = passUserId
-                                dbPass.set(data).addOnSuccessListener { documentReference: Void? ->
-                                    data.clear()
-                                    data["pass"] = encPass
-                                    data["UserId"] = finalPassUserId
-                                    db.collection("Passwords")
-                                        .document(auth.currentUser!!.uid)
-                                        .collection("YourPass").document(id + passTitle).set(data)
-                                        .addOnSuccessListener {
-                                            vm.putPassList(
-                                                passTitle,
-                                                passDesc,
-                                                id + passTitle,
-                                                alias
-                                            )
-                                            vm.putPasses(
-                                                id + passTitle,
-                                                finalPassUserId,
-                                                encPass,
-                                                alias
-                                            )
-                                            Toast.makeText(
-                                                this@GeneratePass,
-                                                "Successfully completed",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            alertDialog1.dismiss()
-                                        }.addOnFailureListener { e: Exception? ->
-                                            alertDialog1.dismiss()
-                                            Toast.makeText(
-                                                this@GeneratePass,
-                                                "Something went wrong",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                }.addOnFailureListener { e: Exception? ->
-                                    Toast.makeText(
-                                        this@GeneratePass,
-                                        "Something went wrong",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    alertDialog1.dismiss()
-                                }
-                            } else {
-                                Toast.makeText(this, "Login First", Toast.LENGTH_SHORT).show()
+                                db.collection("Passwords")
+                                    .document(auth.currentUser!!.uid)
+                                    .collection("YourPass").document(id + passTitle).set(passData)
+                                    .addOnSuccessListener {
+                                        vm.putPassList(
+                                            passTitle,
+                                            passDesc,
+                                            id + passTitle,
+                                            alias,
+                                            modify
+                                        )
+                                        vm.putPasses(
+                                            id + passTitle,
+                                            passUserId,
+                                            encPass,
+                                            alias
+                                        )
+                                        Toast.makeText(
+                                            this@GeneratePass,
+                                            "Successfully completed",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        alertDialog1.dismiss()
+                                    }.addOnFailureListener { e: Exception? ->
+                                        alertDialog1.dismiss()
+                                        Toast.makeText(
+                                            this@GeneratePass,
+                                            "Something went wrong",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                            }.addOnFailureListener { e: Exception? ->
+                                Toast.makeText(
+                                    this@GeneratePass,
+                                    "Something went wrong",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 alertDialog1.dismiss()
                             }
+                        } else {
+                            Toast.makeText(this, "Login First", Toast.LENGTH_SHORT).show()
+                            alertDialog1.dismiss()
                         }
                     }
-                })
-            } else {
-                Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show()
-                alertDialog.dismiss()
+                }
             }
         }
 

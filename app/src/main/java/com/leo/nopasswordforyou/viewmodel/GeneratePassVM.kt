@@ -87,7 +87,7 @@ class GeneratePassVM @Inject constructor(
         }
     }
 
-    fun putPassList(title: String, description: String, id: String, alias: String) {
+    fun putPassList(title: String, description: String, id: String, alias: String, modify: Long) {
         viewModelScope.launch {
             passListDao.insertNewPass(
                 PassListEntity(
@@ -95,7 +95,7 @@ class GeneratePassVM @Inject constructor(
                     desc = description,
                     alias = alias,
                     passId = id,
-                    lastModify = 0L
+                    lastModify = modify
                 )
             )
         }

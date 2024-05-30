@@ -28,19 +28,16 @@ import android.text.Editable
 import android.text.InputType
 import android.util.Log
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
@@ -52,8 +49,11 @@ import com.leo.nopasswordforyou.R
 import com.leo.nopasswordforyou.database.passes.PassesEntity
 import com.leo.nopasswordforyou.database.passlist.PassListEntity
 import com.leo.nopasswordforyou.databinding.ActivityShowPassBinding
+import com.leo.nopasswordforyou.databinding.AddAliasBinding
+import com.leo.nopasswordforyou.databinding.CustomKeysetBinding
 import com.leo.nopasswordforyou.databinding.CustomSaveToCloudBinding
 import com.leo.nopasswordforyou.databinding.CustomShowPassBinding
+import com.leo.nopasswordforyou.databinding.LoadingDilogue2Binding
 import com.leo.nopasswordforyou.helper.ItemClickListner
 import com.leo.nopasswordforyou.helper.PassAdapter
 import com.leo.nopasswordforyou.helper.PassAdapterData
@@ -73,7 +73,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
     lateinit var passData: ArrayList<PassAdapterData>
     lateinit var passAdapter: PassAdapter
     lateinit var alertDialog1: AlertDialog
-    lateinit var keySetting: AlertDialog
+
     lateinit var keySettingNewKey: AlertDialog
     lateinit var vm: ShowPassVM
     lateinit var binding: ActivityShowPassBinding
@@ -96,21 +96,12 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
 
         vm = ViewModelProvider(this).get(ShowPassVM::class.java)
 
+        val lDB = LoadingDilogue2Binding.inflate(layoutInflater)
+        alertDialog1 = alertDialogueBuilder(lDB.root)
 
-
-
-
-        alertDialog1 = MaterialAlertDialogBuilder(this).setView(R.layout.loading_dilogue_2).create()
-        alertDialog1.setCanceledOnTouchOutside(false)
-        alertDialog1.setCancelable(false)
-        alertDialog1.show()
-        val t = alertDialog1.findViewById<TextView>(R.id.loadingText)
-        if (t != null) {
-            t.text = "Getting passwords"
-        }
+        lDB.loadingText.text = "Getting passwords"
 
         passData = ArrayList()
-
 
         auth.addAuthStateListener(object : AuthStateListener {
             override fun onAuthStateChanged(firebaseAuth: FirebaseAuth) {
@@ -143,48 +134,41 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
         binding.syncPass.setOnClickListener { v: View? -> getPasses() }
 
         binding.keySet.setOnClickListener {
-            keySetting = MaterialAlertDialogBuilder(this).setView(R.layout.custom_keyset).create()
-            keySetting.setCanceledOnTouchOutside(true)
-            keySetting.setCancelable(true)
-            keySetting.show()
-            val newKey = keySetting.findViewById<MaterialButton>(R.id.newKey)
-            val addKey = keySetting.findViewById<MaterialButton>(R.id.addKey)
-            addKey?.setOnClickListener { v1: View? ->
+
+            val keyBind = CustomKeysetBinding.inflate(layoutInflater)
+
+
+            val keySetting: AlertDialog = alertDialogueBuilder(keyBind.root)
+            keyBind.addKey.setOnClickListener {
 
             }
-            newKey?.setOnClickListener { v12: View? ->
-                keySettingNewKey =
-                    MaterialAlertDialogBuilder(this).setView(R.layout.add_alias).create()
-                keySettingNewKey.setCanceledOnTouchOutside(true)
-                keySettingNewKey.setCancelable(true)
-                keySettingNewKey.show()
-                val text = keySettingNewKey.findViewById<TextInputEditText>(R.id.alias)
-                val doneButton = keySettingNewKey.findViewById<AppCompatButton>(R.id.addKey)
-                val infoText = keySettingNewKey.findViewById<TextView>(R.id.infoText)
+            keyBind.newKey.setOnClickListener {
+                val ksnBind = AddAliasBinding.inflate(layoutInflater)
+                keySettingNewKey = alertDialogueBuilder(ksnBind.root)
+
 
                 var exit = false
-                doneButton?.setOnClickListener {
+                ksnBind.addKey.setOnClickListener {
                     if (exit) {
                         keySettingNewKey.dismiss()
                         keySetting.dismiss()
-                    } else if (text != null && checkExternalWritePer(
+                    } else if (checkExternalWritePer(
                             this,
                             this,
                             requestPermissionLauncher
                         )
                     ) {
-                        if (text.text.toString().isNotEmpty()) {
+                        if (ksnBind.alias.text.toString().trim().isNotEmpty()) {
                             val security = Security(
-                                this, text.text.toString()
+                                this, ksnBind.alias.text.toString()
                             )
-                            val result = security.newKey(text.text.toString())
+                            val result = security.newKey(ksnBind.alias.text.toString())
                             if (result.equals("done")) {
-                                doneButton.text = "Exit"
+                                ksnBind.addKey.text = "Exit"
                                 exit = true
-                                vm.setAlias(text.text.toString())
-                                infoText?.text =
-                                    "An new Key with the alias : ${text.text.toString()} has been created and has been saved to \n 'Download/noPassWordForYou/${text.text.toString()}.ppk' \n Never Share the file to someone else and keep it private.\n why ? see Help section for More Info !"
-
+                                vm.setAlias(ksnBind.alias.text.toString())
+                                ksnBind.infoText.text =
+                                    "An new Key with the alias : ${ksnBind.alias.text.toString()} has been created and has been saved to \n'Download/noPassWordForYou/${ksnBind.alias.text.toString()}.ppk' \nNever Share the file to someone else and keep it private.\nSee Help section for More Info !"
                             }
                             Toast.makeText(this, result, Toast.LENGTH_SHORT).show()
                         } else Toast.makeText(this, "empty alias", Toast.LENGTH_SHORT).show()
@@ -235,11 +219,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
             finish()
         }
         //val dbPass3 = dbTitles.document(id)
-        /*dbPass =
-            db.collection("Passwords")
-                .document(auth.currentUser!!.uid)
-                .collection("YourPass")
-                .document(id)*/
+
 
         vm.getPass(id) {
             val ToDecode = it.password
@@ -312,64 +292,47 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
                                         .collection("YourPass")
                                         .document(id)
                                 Toast.makeText(this, "Working", Toast.LENGTH_SHORT).show()
-                                val data: MutableMap<String, String> = HashMap()
+                                val passListData = PassListEntity(
+                                    id,
+                                    uBSave.passTitleCustom.text.toString(),
+                                    uBSave.passDescCustom.text.toString(),
+                                    alias,
+                                    System.currentTimeMillis()
+                                )
 
-                                if (Objects.requireNonNull<Editable?>(uBSave.passTitleCustom.text)
-                                        .toString().trim { it <= ' ' } != Title
-                                ) {
-                                    data["Title"] = uBSave.passTitleCustom.text.toString()
-                                }
+                                dbPass2.set(passListData, SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        vm.updatePassList(passListData)
 
-
-                                if (Objects.requireNonNull<Editable?>(uBSave.passDescCustom.text)
-                                        .toString().trim { it <= ' ' } != Desc
-                                ) {
-                                    data["Desc"] = uBSave.passDescCustom.text.toString()
-                                }
-                                if ((data.isNotEmpty())) {
-                                    vm.updatePassList(
-                                        PassListEntity(
-                                            id,
-                                            uBSave.passTitleCustom.getText().toString(),
-                                            uBSave.passDescCustom.text.toString(),
-                                            alias,
-                                            0L
-                                        )
-                                    )
-                                    /*dbPass2.set(data, SetOptions.merge())
-                                        .addOnFailureListener { e: Exception ->
-                                            Toast.makeText(
-                                                this@ShowPass, e.message, Toast.LENGTH_SHORT
-                                            ).show()
-                                        }*/
-                                }
-                                data.clear()
-
-                                if (ToDecode != uBSave.passSaveCustom.text.toString() && uBSave.passSaveCustom.text.toString().length > 50) {
-                                    data["pass"] = uBSave.passSaveCustom.text.toString()
-                                }
-
-                                if (Objects.requireNonNull<Editable?>(uBSave.passUserIdCustom.text)
-                                        .toString() != UserId
-                                ) {
-                                    data["UserId"] = uBSave.passUserIdCustom.text.toString()
-                                }
-                                if (data.isNotEmpty()) {
-                                    vm.updatePass(
-                                        PassesEntity(
+                                        val passData = PassesEntity(
                                             id,
                                             uBSave.passUserIdCustom.text.toString(),
                                             uBSave.passSaveCustom.text.toString(),
                                             alias
                                         )
-                                    )
-                                    dbPass2.set(data, SetOptions.merge())
-                                        .addOnFailureListener { e: Exception ->
-                                            Toast.makeText(
-                                                this@ShowPass, e.message, Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                }
+                                        vm.updatePass(
+                                            passData
+                                        )
+                                        dbPass =
+                                            db.collection("Passwords")
+                                                .document(auth.currentUser!!.uid)
+                                                .collection("YourPass")
+                                                .document(id)
+                                        dbPass.set(passData, SetOptions.merge())
+                                            .addOnFailureListener { e: Exception ->
+                                                Toast.makeText(
+                                                    this@ShowPass, e.message, Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+
+                                    }.addOnFailureListener { e: Exception ->
+                                        Toast.makeText(
+                                            this@ShowPass, e.message, Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+
+
                                 alertDialog2.dismiss()
                                 getPasses()
                                 Toast.makeText(this, "updated", Toast.LENGTH_SHORT).show()
@@ -379,7 +342,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
                             dialog.cancel()
                             alertDialog1.dismiss()
                         }
-                        .setNegativeButton("Delete") { dialog: DialogInterface, which: Int ->
+                        .setNegativeButton("Delete") { dialog: DialogInterface, _: Int ->
                             Log.d("tag", "id : $id Title : $Title")
                             vm.deletePass(id)
                             vm.deletePassList(id)
@@ -399,8 +362,8 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
                                      ).show()
                                  }*/
                             alertDialog1.dismiss()
-                            getPasses()
                             dialog.dismiss()
+                            getPasses()
                         }
                     ad.create().show()
                 }
@@ -426,10 +389,8 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
 
                 copyUserIdCustom?.setOnClickListener { copy(UserId) }
 
-                if (copyPassCustom != null) {
-                    copyPassCustom.setOnClickListener(View.OnClickListener {
-                        copy(decodedData)
-                    })
+                copyPassCustom?.setOnClickListener {
+                    copy(decodedData)
                 }
                 if (passUserIdShowCustom != null) {
                     passUserIdShowCustom.text = UserId
@@ -444,7 +405,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
         clipboard.setPrimaryClip(clip)
     }
 
-    fun alertDialogueBuilder(view: View): AlertDialog {
+    private fun alertDialogueBuilder(view: View): AlertDialog {
         val a = MaterialAlertDialogBuilder(this).setView(view).create()
         a.setCancelable(true)
         a.setCanceledOnTouchOutside(true)

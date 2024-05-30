@@ -25,14 +25,27 @@ import android.content.Context
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import com.leo.nopasswordforyou.R
+import com.leo.nopasswordforyou.database.passes.PassesDao
+import com.leo.nopasswordforyou.database.passes.PassesEntity
+import com.leo.nopasswordforyou.database.passlist.PassListDao
+import com.leo.nopasswordforyou.database.passlist.PassListEntity
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class Login_pageVM : ViewModel() {
+@HiltViewModel
+class Login_pageVM @Inject constructor(val passesDao: PassesDao, val passListDao: PassListDao) :
+    ViewModel() {
 
     lateinit var mAuth: FirebaseAuth
     fun init(context: Context, mAuth: FirebaseAuth) {
@@ -50,7 +63,9 @@ class Login_pageVM : ViewModel() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
 
+                    populateDb()
                     result.invoke("Success")
+
 
                     //   loggedIn();
                     Log.d(ContentValues.TAG, "signInWithEmail:success")
@@ -62,6 +77,43 @@ class Login_pageVM : ViewModel() {
                 } else result.invoke("Something went wrong")
 
             }
+    }
+
+    private fun populateDb() {
+        val db = FirebaseFirestore.getInstance()
+        val auth: FirebaseAuth = FirebaseAuth.getInstance()
+        val dbPassList: CollectionReference =
+            db.collection("PasswordManager").document(auth.currentUser!!.uid)
+                .collection("YourPass")
+
+        dbPassList.get().addOnSuccessListener {
+            val data = ArrayList<PassListEntity>()
+            it.documents.forEach { doc ->
+                if (doc != null) {
+                    doc.toObject<PassListEntity>()?.let { it1 -> data.add(it1) }
+                }
+            }
+            viewModelScope.launch {
+                passListDao.insertAllNewPass(data)
+            }
+        }
+
+        val dbPass =
+            db.collection("Passwords")
+                .document(auth.currentUser!!.uid)
+                .collection("YourPass")
+
+        dbPass.get().addOnSuccessListener {
+            val data = ArrayList<PassesEntity>()
+            it.documents.forEach { doc ->
+                doc.toObject<PassesEntity>()?.let { it1 -> data.add(it1) }
+            }
+            viewModelScope.launch {
+                passesDao.insertAllPass(data)
+            }
+        }
+
+
     }
 
 
@@ -77,6 +129,7 @@ class Login_pageVM : ViewModel() {
                 if (error != null) {
                     result.invoke(error)
                 } else result.invoke("Something went wrong")
+
 
             }
     }

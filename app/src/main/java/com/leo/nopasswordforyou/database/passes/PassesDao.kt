@@ -31,8 +31,14 @@ interface PassesDao {
     @Insert
     suspend fun insertNewPass(passesEntity: PassesEntity)
 
+    @Insert
+    suspend fun insertAllPass(passesEntities: List<PassesEntity>)
+
     @Query("SELECT * FROM passes WHERE passId = :keyId")
     suspend fun getPass(keyId: String): PassesEntity
+
+    @Query("SELECT * FROM passes")
+    suspend fun getAllPass(): List<PassesEntity>
 
     @Update()
     suspend fun updatePass(passesEntity: PassesEntity)
@@ -40,7 +46,19 @@ interface PassesDao {
     @Delete()
     suspend fun deletePass(passesEntity: PassesEntity)
 
+    @Delete
+    suspend fun deleteAllPass(passesEntities: List<PassesEntity>)
+
     suspend fun deletePass(keyId: String) {
         deletePass(getPass(keyId))
     }
+
+    suspend fun deleteAll() {
+        deleteAllPass(getAllPass())
+    }
+
+
+
+
+
 }

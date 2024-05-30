@@ -6,14 +6,6 @@
         <entry key="Firebase Crashlytics">
           <value>
             <InsightsFilterSettings>
-              <option name="connection">
-                <ConnectionSetting>
-                  <option name="appId" value="com.leo.nopasswordforyou" />
-                  <option name="mobileSdkAppId" value="1:507362349643:android:f63e0c201ebdc8cda533ce" />
-                  <option name="projectId" value="no-pass-for-ya" />
-                  <option name="projectNumber" value="507362349643" />
-                </ConnectionSetting>
-              </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
               <option name="timeIntervalDays" value="THIRTY_DAYS" />
               <option name="visibilityType" value="ALL" />

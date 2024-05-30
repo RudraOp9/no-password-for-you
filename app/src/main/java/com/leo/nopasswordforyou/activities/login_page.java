@@ -35,6 +35,9 @@ import com.leo.nopasswordforyou.R;
 import com.leo.nopasswordforyou.databinding.ActivityLoginPageBinding;
 import com.leo.nopasswordforyou.viewmodel.Login_pageVM;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class login_page extends AppCompatActivity {
 
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -47,10 +50,13 @@ public class login_page extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (mAuth.getCurrentUser() != null) {
+            startActivity(new Intent(login_page.this, ShowPass.class));
+            finish();
+        }
         binding = ActivityLoginPageBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-
         Login_pageVM vm = new ViewModelProvider(this).get(Login_pageVM.class);
         vm.init(this, mAuth);
         AlertDialog alertDialog;
@@ -60,18 +66,7 @@ public class login_page extends AppCompatActivity {
         alertDialog.setCancelable(false);
 
 
-        mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                mAuth.getCurrentUser();
-                if (mAuth.getCurrentUser() != null) {
-                    startActivity(new Intent(login_page.this, ShowPass.class));
-                    mAuth.removeAuthStateListener(this);
 
-                    finish();
-                }
-            }
-        });
 
 
         binding.doSignUp.setOnClickListener(v -> {
@@ -100,6 +95,10 @@ public class login_page extends AppCompatActivity {
                         this, s -> {
                             Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
                             alertDialog.dismiss();
+                            if (mAuth.getCurrentUser() != null) {
+                                startActivity(new Intent(login_page.this, ShowPass.class));
+                                finish();
+                            }
                             return null;
                         });
             }
@@ -124,7 +123,12 @@ public class login_page extends AppCompatActivity {
                         (s) -> {
                     alertDialog.dismiss();
                             Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+                            if (mAuth.getCurrentUser() != null) {
+                                startActivity(new Intent(login_page.this, ShowPass.class));
+                                finish();
+                            }
                             return null;
+
                         });
 
 
