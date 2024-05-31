@@ -16,45 +16,37 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package com.leo.nopasswordforyou.activities
 
-package com.leo.nopasswordforyou.activities;
-
-
-import android.content.Intent;
-
-import android.os.Bundle;
-
-
-import android.os.Vibrator;
-import android.view.View;
-import android.widget.Button;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.leo.nopasswordforyou.R;
-import com.leo.nopasswordforyou.databinding.ActivityMainBinding;
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import com.leo.nopasswordforyou.databinding.ActivityMainBinding
 
 
-public class MainActivity extends AppCompatActivity {
+class MainActivity : AppCompatActivity() {
+    private var binding: ActivityMainBinding? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view: View = binding!!.root
+        setContentView(view)
 
 
-    private ActivityMainBinding binding;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        View view = binding.getRoot();
-        setContentView(view);
-
-
-        binding.generatePass.setOnClickListener(v -> {
-            startActivity(new Intent(MainActivity.this,GeneratePass.class));
-        });
-        binding.activityLogin.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, login_page.class)));
-
+        binding!!.generatePass.setOnClickListener {
+            startActivity(
+                Intent(
+                    this@MainActivity, GeneratePass::class.java
+                )
+            )
+        }
+        binding!!.activityLogin.setOnClickListener {
+            startActivity(
+                Intent(
+                    this@MainActivity, login_page::class.java
+                )
+            )
+        }
     }
-
-
-
-
 }

@@ -1,7 +1,7 @@
-package com.leo.nopasswordforyou.helper;
+package com.leo.nopasswordforyou.helper
 
-import android.view.View;
+import android.view.View
 
-public interface ItemClickListner {
-     void onClick(View v, String id, String Title, String Desc, String alias);
+interface ItemClickListner {
+    fun onClick(v: View, id: String, Title: String, Desc: String, alias: String)
 }

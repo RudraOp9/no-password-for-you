@@ -30,7 +30,6 @@ import androidx.core.content.ContextCompat
 
 fun checkExternalWritePer(
     context: Context,
-    activity: AppCompatActivity,
     requestPermissionLauncher: ActivityResultLauncher<String>
 ): Boolean {
 

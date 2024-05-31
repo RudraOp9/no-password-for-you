@@ -1,15 +1,12 @@
 package com.leo.nopasswordforyou.helper
 
-import java.util.Arrays
-import java.util.Collections
-
 class NewPass {
-    var alphaCapLength: Byte = 0
-    var specialSymbol: Byte = 0
-    var numberslen: Byte = 0
-    var alphaSmallLength: Byte = 6
-    var passLength: Byte = 16
-    var capitalLetter = arrayOf(
+    private var alphaCapLength: Byte = 0
+    private var specialSymbol: Byte = 0
+    private var numberslen: Byte = 0
+    private var alphaSmallLength: Byte = 6
+    private var passLength: Byte = 16
+    private var capitalLetter = arrayOf(
         "A",
         "B",
         "C",
@@ -70,13 +67,13 @@ class NewPass {
     fun generateNewPass(
         alphaCapLength: Byte,
         specialSymbol: Byte,
-        numberslen: Byte,
+        numbersLen: Byte,
         alphaSmallLength: Byte,
         passLength: Byte
     ): String {
         this.alphaCapLength = alphaCapLength
         this.specialSymbol = specialSymbol
-        this.numberslen = numberslen
+        this.numberslen = numbersLen
         this.alphaSmallLength = alphaSmallLength
         this.passLength = passLength
         val password = ArrayList<String?>(passLength.toInt())
@@ -86,13 +83,13 @@ class NewPass {
         for (d in 0 until specialSymbol) {
             password.add(specials[(Math.random() * 9).toInt()])
         }
-        for (c in 0 until numberslen) {
+        for (c in 0 until numbersLen) {
             password.add(numbers[(Math.random() * 9).toInt()])
         }
         for (b in 0 until alphaCapLength) {
             password.add(capitalLetter[(Math.random() * 25).toInt()])
         }
         password.shuffle()
-        return password.toArray().contentToString()
+        return password.joinToString("", "", "", -1, "", null)
     }
 }

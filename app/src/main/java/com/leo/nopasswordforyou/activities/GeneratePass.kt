@@ -75,10 +75,9 @@ class GeneratePass : AppCompatActivity() {
 
         //TODO make an app for the ads on billboard etc...
         security = if (auth.currentUser == null) {
-            Security(this, "NoPassWordForTheNewUser")
+            Security(this)
         } else Security(
-            this,
-            ""
+            this
         )
 
 
@@ -101,7 +100,7 @@ class GeneratePass : AppCompatActivity() {
                  finish()
              }*/
         }
-        binding.regeneratePass.setOnClickListener { v: View? ->
+        binding.regeneratePass.setOnClickListener {
             vm.genNewPass()
         }
 
@@ -155,7 +154,7 @@ class GeneratePass : AppCompatActivity() {
 
 
 
-            csB.exitButtonCustom.setOnClickListener { v12: View? -> alertDialog.dismiss() }
+            csB.exitButtonCustom.setOnClickListener { alertDialog.dismiss() }
             csB.passDoneCustom.setOnClickListener { v1: View? ->
                 if (Objects.requireNonNull<Editable?>(
                         Objects.requireNonNull(csB.passTitleCustom).text
@@ -232,7 +231,7 @@ class GeneratePass : AppCompatActivity() {
                                             Toast.LENGTH_SHORT
                                         ).show()
                                         alertDialog1.dismiss()
-                                    }.addOnFailureListener { e: Exception? ->
+                                    }.addOnFailureListener {
                                         alertDialog1.dismiss()
                                         Toast.makeText(
                                             this@GeneratePass,
@@ -240,7 +239,7 @@ class GeneratePass : AppCompatActivity() {
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
-                            }.addOnFailureListener { e: Exception? ->
+                            }.addOnFailureListener {
                                 Toast.makeText(
                                     this@GeneratePass,
                                     "Something went wrong",
@@ -361,7 +360,7 @@ class GeneratePass : AppCompatActivity() {
                     vm.updateTotalText()
                 }
             }
-        binding.customSetSwitch.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+        binding.customSetSwitch.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
             if (isChecked) {
                 binding.customSettings.visibility = View.VISIBLE
                 vm.numberslen = (binding.spinnerNumbers.selectedItem as String).toByte()

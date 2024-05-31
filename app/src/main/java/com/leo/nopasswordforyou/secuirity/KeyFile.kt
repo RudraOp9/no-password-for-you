@@ -21,8 +21,11 @@ package com.leo.nopasswordforyou.secuirity
 
 data class KeyFile(
     var privateKeyEncoded: ByteArray, var privateKeyFormat: String,
-    var publicKeyEncoded: ByteArray, var publicKeyFormat: String
+    var publicKeyEncoded: ByteArray, var publicKeyFormat: String,
+    var alias: String
 ) {
+    constructor() : this(ByteArray(0), "", ByteArray(0), "", "")
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -33,6 +36,7 @@ data class KeyFile(
         if (privateKeyFormat != other.privateKeyFormat) return false
         if (!publicKeyEncoded.contentEquals(other.publicKeyEncoded)) return false
         if (publicKeyFormat != other.publicKeyFormat) return false
+        if (alias != other.alias) return false
 
         return true
     }
@@ -42,6 +46,8 @@ data class KeyFile(
         result = 31 * result + privateKeyFormat.hashCode()
         result = 31 * result + publicKeyEncoded.contentHashCode()
         result = 31 * result + publicKeyFormat.hashCode()
+        result = 31 * result + alias.hashCode()
         return result
     }
+
 }

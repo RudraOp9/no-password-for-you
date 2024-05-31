@@ -1,92 +1,67 @@
-package com.leo.nopasswordforyou.helper;
+package com.leo.nopasswordforyou.helper
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
+import com.google.firebase.firestore.FirebaseFirestore
+import com.leo.nopasswordforyou.R
+import com.leo.nopasswordforyou.helper.PassAdapter.MyViewHolder
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+class PassAdapter(
+    private val listData: ArrayList<PassAdapterData>,
+    private val uid: String,
+    var db: FirebaseFirestore
+) : RecyclerView.Adapter<MyViewHolder?>() {
+    var clickListner: ItemClickListner? = null
 
-
-import com.google.android.material.card.MaterialCardView;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import com.leo.nopasswordforyou.R;
-
-
-import java.util.ArrayList;
-
-public class PassAdapter extends RecyclerView.Adapter<PassAdapter.MyViewHolder> {
-    private final ArrayList<PassAdapterData> listData;
-    private final String uid;
-    FirebaseFirestore db;
-    public ItemClickListner clickListner;
-
-    public void setClickListener(ItemClickListner clickListener) {
-        this.clickListner = clickListener;
+    fun setClickListener(clickListener: ItemClickListner?) {
+        this.clickListner = clickListener
     }
 
 
-    public PassAdapter(ArrayList<PassAdapterData> listData, String uid, FirebaseFirestore db) {
-        this.listData = listData;
-        this.db = db;
-        this.uid = uid;
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val listItem = inflater.inflate(R.layout.custom_pass_list, parent, false)
+        return MyViewHolder(listItem)
+    }
 
+    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        //   final PassAdapterData myListData = listData.get(position);
+        holder.passTitle.text = listData[position].title
+        holder.passDesc.text = listData[position].description
     }
 
 
-    @NonNull
-    @Override
-    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater  = LayoutInflater.from(parent.getContext());
-        View listItem = inflater.inflate(R.layout.custom_pass_list,parent, false);
-        return new MyViewHolder(listItem);
-
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-     //   final PassAdapterData myListData = listData.get(position);
-        holder.passTitle.setText(listData.get(position).getTitle());
-        holder.passDesc.setText(listData.get(position).getDescription());
-
+    override fun getItemCount(): Int {
+        return listData.size
     }
 
 
+    inner class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
+        View.OnClickListener {
+        var passTitle: TextView = itemView.findViewById(R.id.passTitle)
+        var passDesc: TextView = itemView.findViewById(R.id.passDesc)
+        var passParent: MaterialCardView = itemView.findViewById(R.id.passParent)
 
 
-
-    @Override
-    public int getItemCount() {
-        return listData.size();
-    }
-
-
-
-
-    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        public TextView passTitle;
-        public TextView passDesc;
-        public MaterialCardView passParent;
-
-
-
-        public MyViewHolder(@NonNull View itemView) {
-            super(itemView);
-            this.passTitle = itemView.findViewById(R.id.passTitle);
-            this.passParent = itemView.findViewById(R.id.passParent);
-            this.passDesc = itemView.findViewById(R.id.passDesc);
-            itemView.setOnClickListener(this);
+        init {
+            itemView.setOnClickListener(this)
         }
 
 
-        @Override
-        public void onClick(View v) {
-            if (clickListner != null){
-                clickListner.onClick(v, listData.get(getAdapterPosition()).getId(), listData.get(getAdapterPosition()).getTitle(), listData.get(getAdapterPosition()).getDescription(), listData.get(getAdapterPosition()).getAlias());
+        override fun onClick(v: View) {
+            if (clickListner != null) {
+                clickListner!!.onClick(
+                    v,
+                    listData[adapterPosition].id,
+                    listData[adapterPosition].title,
+                    listData[adapterPosition].description,
+                    listData[adapterPosition].alias
+                )
             }
         }
     }
-
 }

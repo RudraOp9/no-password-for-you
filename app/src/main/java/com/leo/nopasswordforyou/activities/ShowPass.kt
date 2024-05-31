@@ -24,7 +24,6 @@ import android.content.ClipboardManager
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
 import android.text.InputType
 import android.util.Log
 import android.view.View
@@ -33,11 +32,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.net.toFile
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textview.MaterialTextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
@@ -61,27 +62,44 @@ import com.leo.nopasswordforyou.helper.checkExternalWritePer
 import com.leo.nopasswordforyou.secuirity.Security
 import com.leo.nopasswordforyou.viewmodel.ShowPassVM
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Objects
 
 
 @AndroidEntryPoint
 class ShowPass : AppCompatActivity(), ItemClickListner {
-    lateinit var db: FirebaseFirestore
+    private lateinit var db: FirebaseFirestore
     var auth: FirebaseAuth = FirebaseAuth.getInstance()
-    lateinit var dbTitles: CollectionReference
-    lateinit var dbPass: DocumentReference
-    lateinit var passData: ArrayList<PassAdapterData>
-    lateinit var passAdapter: PassAdapter
-    lateinit var alertDialog1: AlertDialog
+    private lateinit var dbTitles: CollectionReference
+    private lateinit var dbPass: DocumentReference
+    private lateinit var passData: ArrayList<PassAdapterData>
+    private lateinit var passAdapter: PassAdapter
+    private lateinit var alertDialog1: AlertDialog
 
-    lateinit var keySettingNewKey: AlertDialog
-    lateinit var vm: ShowPassVM
-    lateinit var binding: ActivityShowPassBinding
-    val requestPermissionLauncher =
+    private lateinit var keySettingNewKey: AlertDialog
+    private lateinit var vm: ShowPassVM
+    private lateinit var binding: ActivityShowPassBinding
+    private val requestPermissionLauncher =
         this.registerForActivityResult(
             ActivityResultContracts.RequestPermission(),
         ) { _: Boolean ->
 
+        }
+    private val filePickerLauncher =
+        this.registerForActivityResult(ActivityResultContracts.OpenDocument()) {
+            if (it != null) {
+                contentResolver.openInputStream(it)?.use { inputStream ->
+
+                    val fileContents = inputStream.bufferedReader()
+                        .use { it0 -> it0.readText() }
+                    Security(this).importKey(fileContents) { result ->
+                        if (result != "error") {
+                            Snackbar.make(binding.root, "Key successfully imported", 3500).show()
+                            vm.setAlias(result)
+                        } else {
+                            Snackbar.make(binding.root, "Error , contact support", 3500).show()
+                        }
+                    }
+                }
+            }
         }
 
     @SuppressLint("SetTextI18n")
@@ -131,7 +149,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
         getPasses()
 
 
-        binding.syncPass.setOnClickListener { v: View? -> getPasses() }
+        binding.syncPass.setOnClickListener { getPasses() }
 
         binding.keySet.setOnClickListener {
 
@@ -140,6 +158,12 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
 
             val keySetting: AlertDialog = alertDialogueBuilder(keyBind.root)
             keyBind.addKey.setOnClickListener {
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+                intent.addCategory(Intent.CATEGORY_OPENABLE)
+                intent.type = "*/*"
+
+                filePickerLauncher.launch(arrayOf("*/*"))
+
 
             }
             keyBind.newKey.setOnClickListener {
@@ -154,13 +178,12 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
                         keySetting.dismiss()
                     } else if (checkExternalWritePer(
                             this,
-                            this,
                             requestPermissionLauncher
                         )
                     ) {
                         if (ksnBind.alias.text.toString().trim().isNotEmpty()) {
                             val security = Security(
-                                this, ksnBind.alias.text.toString()
+                                this
                             )
                             val result = security.newKey(ksnBind.alias.text.toString())
                             if (result.equals("done")) {
@@ -225,8 +248,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
             val ToDecode = it.password
             val UserId = it.userId
             val security = Security(
-                this,
-                "NOPASSWORDFF!!!!" + (FirebaseAuth.getInstance().currentUser?.uid)
+                this
             )
             val decodedData = security.decryptData(ToDecode, it.alias) {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
@@ -346,21 +368,6 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
                             Log.d("tag", "id : $id Title : $Title")
                             vm.deletePass(id)
                             vm.deletePassList(id)
-                            //dbPass.delete()
-                            /* dbPass3.delete().addOnSuccessListener { unused: Void? ->
-                                 Log.d(
-                                     "tag",
-                                     " delete it"
-                                 )
-                             }
-                                 .addOnFailureListener { e: Exception ->
-                                     Log.d("tag", "can't delete it")
-                                     Toast.makeText(
-                                         this@ShowPass,
-                                         e.message + " Localized : " + e.localizedMessage,
-                                         Toast.LENGTH_SHORT
-                                     ).show()
-                                 }*/
                             alertDialog1.dismiss()
                             dialog.dismiss()
                             getPasses()
@@ -373,7 +380,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
 
                     if (showPassEyeCustom != null) {
                         val a = booleanArrayOf(true)
-                        showPassEyeCustom.setOnClickListener(View.OnClickListener { v1: View? ->
+                        showPassEyeCustom.setOnClickListener(View.OnClickListener {
                             if (a[0]) {
                                 passShowCustom.inputType =
                                     InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
@@ -412,6 +419,8 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
         a.show()
         return a
     }
+
+
 }
 /*override fun onClick(v: View, id: String, Title: String, Desc: String) {
 //        Toast.makeText(this, id, Toast.LENGTH_SHORT).show();

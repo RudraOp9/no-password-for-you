@@ -11,6 +11,8 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
+    <uses-feature android:name="android.hardware.strongbox_keystore" />
+
     <application
         android:name=".App"
         android:allowBackup="true"

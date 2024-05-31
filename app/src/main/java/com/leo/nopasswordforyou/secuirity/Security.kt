@@ -16,278 +16,303 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package com.leo.nopasswordforyou.secuirity
 
-package com.leo.nopasswordforyou.secuirity;
-
-import static org.bouncycastle.asn1.x509.Extension.authorityKeyIdentifier;
-import static org.bouncycastle.asn1.x509.Extension.subjectKeyIdentifier;
-
-import android.content.Context;
-import android.os.Environment;
-import android.security.keystore.KeyProperties;
-import android.util.Base64;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.google.gson.Gson;
-
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-
-import javax.annotation.Nullable;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
-
-public class Security {
-
-    final String ALGORITHM = "RSA";
-    final String BLOCK_MODE = KeyProperties.BLOCK_MODE_ECB;
-    final String PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1;
-    final String KEYSTORE = "AndroidKeyStore";
-    final String TRANSFORMATION = String.format("%S/%S/%S", ALGORITHM, BLOCK_MODE, PADDING);
-    Cipher cipher;
-    KeyStore keyStore;
-    Context context;
-    String alias;
+import android.content.Context
+import android.os.Environment
+import android.security.keystore.KeyProperties
+import android.util.Base64
+import android.util.Log
+import android.widget.Toast
+import com.google.gson.Gson
+import org.bouncycastle.asn1.x500.X500Name
+import org.bouncycastle.asn1.x509.BasicConstraints
+import org.bouncycastle.asn1.x509.Extension
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
+import org.bouncycastle.cert.X509v3CertificateBuilder
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.math.BigInteger
+import java.nio.charset.StandardCharsets
+import java.security.InvalidKeyException
+import java.security.Key
+import java.security.KeyFactory
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.KeyStore
+import java.security.KeyStoreException
+import java.security.NoSuchAlgorithmException
+import java.security.PrivateKey
+import java.security.Security
+import java.security.UnrecoverableEntryException
+import java.security.cert.Certificate
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
+import java.util.Date
+import javax.crypto.BadPaddingException
+import javax.crypto.Cipher
+import javax.crypto.IllegalBlockSizeException
+import javax.crypto.NoSuchPaddingException
 
 
-    public Security(Context context, String alias) {
-        this.context = context;
+class Security(var context: Context) {
+    val ALGORITHM: String = "RSA"
+    val BLOCK_MODE: String = KeyProperties.BLOCK_MODE_ECB
+    val PADDING: String = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
+    val KEYSTORE: String = "AndroidKeyStore"
+    val TRANSFORMATION: String = String.format("%S/%S/%S", ALGORITHM, BLOCK_MODE, PADDING)
+    var cipher: Cipher? = null
+    var keyStore: KeyStore? = null
+
+
+    init {
         try {
-            cipher = Cipher.getInstance(TRANSFORMATION);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            Toast.makeText(context, "Error : Contact Support", Toast.LENGTH_SHORT).show();
-            return;
+            cipher = Cipher.getInstance(TRANSFORMATION)
+        } catch (e: NoSuchAlgorithmException) {
+            Toast.makeText(context, "Error : Contact Support", Toast.LENGTH_SHORT).show()
+        } catch (e: NoSuchPaddingException) {
+            Toast.makeText(context, "Error : Contact Support", Toast.LENGTH_SHORT).show()
         }
         try {
-            keyStore = KeyStore.getInstance(KEYSTORE);
-        } catch (KeyStoreException e) {
-            Toast.makeText(context, "Error : Device problem , contact support", Toast.LENGTH_SHORT).show();
-            return;
+            keyStore = KeyStore.getInstance(KEYSTORE)
+        } catch (e: KeyStoreException) {
+            Toast.makeText(context, "Error : Device problem , contact support", Toast.LENGTH_SHORT)
+                .show()
         }
         try {
-            keyStore.load(null);
-        } catch (IOException e) {
-            Toast.makeText(context, "something went unusual", Toast.LENGTH_SHORT).show();
-            return;
-        } catch (NoSuchAlgorithmException | CertificateException e) {
-            Toast.makeText(context, "Error : Contact Support team", Toast.LENGTH_SHORT).show();
-            return;
+            keyStore!!.load(null)
+        } catch (e: IOException) {
+            Toast.makeText(context, "something went unusual", Toast.LENGTH_SHORT).show()
+        } catch (e: NoSuchAlgorithmException) {
+            Toast.makeText(context, "Error : Contact Support team", Toast.LENGTH_SHORT).show()
+        } catch (e: CertificateException) {
+            Toast.makeText(context, "Error : Contact Support team", Toast.LENGTH_SHORT).show()
         }
-        this.alias = alias;
 
     }
 
-    public static X509Certificate generateSelfSignedCertificate(KeyPair keyPair) throws Exception {
-        java.security.Security.setProperty("crypto.policy", "unlimited");
-        X500Name issuer = new X500Name("CN= No PassWord For You");
-        X500Name subject = new X500Name("CN= PassWord Encryption");
-        BigInteger serialNumber = BigInteger.valueOf(System.currentTimeMillis());
-
-        SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
-
-        X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
-                issuer,
-                serialNumber,
-                new Date(System.currentTimeMillis()),
-                new Date(System.currentTimeMillis() * 2),
-                subject,
-                publicKeyInfo);
-
-        certBuilder.addExtension(subjectKeyIdentifier, false, subjectKeyIdentifier);
-        certBuilder.addExtension(authorityKeyIdentifier, false, authorityKeyIdentifier);
-        certBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(true));
-
-        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").build(keyPair.getPrivate());
-        X509CertificateHolder certHolder = certBuilder.build(signer);
-
-        return new JcaX509CertificateConverter().getCertificate(certHolder);
-    }
-
-    @Nullable
-    public String encryptData(String pass, String alias, Function1<String, Unit> error) {
+    fun encryptData(pass: String, alias: String, error: (String) -> Unit): String? {
         try {
-            Key key = getKey(Cipher.ENCRYPT_MODE, alias, error);
+            val key = getKey(Cipher.ENCRYPT_MODE, alias, error)
             if (key != null) {
-                cipher.init(Cipher.ENCRYPT_MODE, key);
-                return new String(Base64.encode(cipher.doFinal(pass.getBytes()), Base64.DEFAULT));
-            } else return null;
-
-        } catch (InvalidKeyException e) {
-            error.invoke("Incorrect Key Chosen ! code 39");
-        } catch (KeyStoreException e) {
-            error.invoke("error code 100");
-        } catch (UnrecoverableEntryException e) {
-            error.invoke("Import key again ! code 50");
-        } catch (NoSuchAlgorithmException e) {
-            error.invoke("error code 101");
-        } catch (BadPaddingException e) {
-            error.invoke("Wrong Key or Incorrect Data , code 129");
-        } catch (IllegalBlockSizeException e) {
-            error.invoke("Wrong Key or Incorrect Data , code 130");
+                cipher!!.init(Cipher.ENCRYPT_MODE, key)
+                return String(Base64.encode(cipher!!.doFinal(pass.toByteArray()), Base64.DEFAULT))
+            } else return null
+        } catch (e: InvalidKeyException) {
+            error.invoke("Incorrect Key Chosen ! code 39")
+        } catch (e: KeyStoreException) {
+            error.invoke("error code 100")
+        } catch (e: UnrecoverableEntryException) {
+            error.invoke("Import key again ! code 50")
+        } catch (e: NoSuchAlgorithmException) {
+            error.invoke("error code 101")
+        } catch (e: BadPaddingException) {
+            error.invoke("Wrong Key or Incorrect Data , code 129")
+        } catch (e: IllegalBlockSizeException) {
+            error.invoke("Wrong Key or Incorrect Data , code 130")
         }
-        Log.d("tag", "in encryptData try block ");
-        return null;
+        Log.d("tag", "in encryptData try block ")
+        return null
     }
 
-    @Nullable
-    public String decryptData(String pass, String alias, Function1<String, Unit> error) {
-
+    fun decryptData(pass: String?, alias: String, error: (String) -> Unit): String? {
         try {
-            Key key = getKey(Cipher.DECRYPT_MODE, alias, error);
+            val key = getKey(Cipher.DECRYPT_MODE, alias, error)
             if (key != null) {
-                cipher.init(Cipher.DECRYPT_MODE, key);
-                return new String(cipher.doFinal(Base64.decode(pass, Base64.DEFAULT)), StandardCharsets.UTF_8);
-            } else return null;
-
-
-        } catch (InvalidKeyException e) {
-            error.invoke("Incorrect Key Chosen ! code 39");
-        } catch (KeyStoreException e) {
-            error.invoke("error code 100");
-        } catch (UnrecoverableEntryException e) {
-            error.invoke("Import key again ! code 50");
-        } catch (NoSuchAlgorithmException e) {
-            error.invoke("error code 101");
-        } catch (BadPaddingException e) {
-            error.invoke("Wrong Key or Incorrect Data , code 129");
-        } catch (IllegalBlockSizeException e) {
-            error.invoke("Wrong Key or Incorrect Data , code 130");
+                cipher!!.init(Cipher.DECRYPT_MODE, key)
+                return String(
+                    cipher!!.doFinal(Base64.decode(pass, Base64.DEFAULT)),
+                    StandardCharsets.UTF_8
+                )
+            } else return null
+        } catch (e: InvalidKeyException) {
+            error.invoke("Incorrect Key Chosen ! code 39")
+        } catch (e: KeyStoreException) {
+            error.invoke("error code 100")
+        } catch (e: UnrecoverableEntryException) {
+            error.invoke("Import key again ! code 50")
+        } catch (e: NoSuchAlgorithmException) {
+            error.invoke("error code 101")
+        } catch (e: BadPaddingException) {
+            error.invoke("Wrong Key or Incorrect Data , code 129")
+        } catch (e: IllegalBlockSizeException) {
+            error.invoke("Wrong Key or Incorrect Data , code 130")
         }
 
-        return null;
+        return null
     }
 
-    @Nullable
-    private Key getKey(int mode, String alias, Function1<String, Unit> error) throws
-            RuntimeException,
-            KeyStoreException,
-            NoSuchAlgorithmException,
-            InvalidKeyException,
-            UnrecoverableEntryException {
-
+    @Throws(
+        RuntimeException::class,
+        KeyStoreException::class,
+        NoSuchAlgorithmException::class,
+        InvalidKeyException::class,
+        UnrecoverableEntryException::class
+    )
+    private fun getKey(mode: Int, alias: String, error: (String) -> Unit): Key? {
         if (mode == Cipher.ENCRYPT_MODE) {
-            if (keyStore.containsAlias(alias)) {
-                Log.d("tag", " encrypting contains the key");
-                return keyStore.getCertificate(alias).getPublicKey();
-
+            if (keyStore!!.containsAlias(alias)) {
+                Log.d("tag", " encrypting contains the key")
+                return keyStore!!.getCertificate(alias).publicKey
             } else {
-                error.invoke("Import key again");
-                return null;
+                error.invoke("Import key again")
+                return null
             }
         } else {
-            if (keyStore.containsAlias(alias)) {
-                Log.d("tag", "key store decrypting contains the key");
-                return keyStore.getKey(alias, null);
+            if (keyStore!!.containsAlias(alias)) {
+                Log.d("tag", "key store decrypting contains the key")
+                return keyStore!!.getKey(alias, null)
             } else {
-                throw new InvalidKeyException("No Key Found : Add Keys First");
+                throw InvalidKeyException("No Key Found : Add Keys First")
             }
         }
-
-
     }
 
-    public String newKey(String alias) {
-        KeyPairGenerator keyPairGenerator;
+    fun newKey(alias: String): String {
+        val keyPairGenerator: KeyPairGenerator
         try {
-            keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
-        } catch (NoSuchAlgorithmException e) {
-            return "Error" + e.getLocalizedMessage();
+            keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM)
+        } catch (e: NoSuchAlgorithmException) {
+            return "Error" + e.localizedMessage
         }
-       /* KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec
+
+        /* KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec
                 .Builder(alias, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
                 .setEncryptionPaddings(PADDING)
                 .build();*/
-
-        keyPairGenerator.initialize(2048);
-        KeyPair keyPair = keyPairGenerator.genKeyPair();
-     /*
+        keyPairGenerator.initialize(2048)
+        val keyPair = keyPairGenerator.genKeyPair()
+        /*
         keyStore.setKeyEntry(alias+"public",keyPair.getPublic(),null,null);
         Enumeration<String> a22 = keyStore.aliases();
         while (a22.hasMoreElements()) Log.d("tagy", a22.nextElement());*/
-        X509Certificate cert;
+        val cert: X509Certificate
         try {
-            cert = generateSelfSignedCertificate(keyPair);
-            keyStore.setKeyEntry(alias
-                    , keyPair.getPrivate(), null, new Certificate[]{cert});
-        } catch (Exception e) {
-            return "Error" + e.getLocalizedMessage();
+            cert = generateSelfSignedCertificate(keyPair)
+            keyStore!!.setKeyEntry(
+                alias,
+                keyPair.private, null, arrayOf<Certificate>(cert)
+            )
+        } catch (e: Exception) {
+            return "Error" + e.localizedMessage
         }
         try {
-
-            for (Enumeration<String> e = keyStore.aliases(); e.hasMoreElements(); ) {
-                Log.d("TAG", "newKey:" + e.nextElement());
+            val e = keyStore!!.aliases()
+            while (e.hasMoreElements()) {
+                Log.d("TAG", "newKey:" + e.nextElement())
             }
-
-
-        } catch (KeyStoreException e) {
-            throw new RuntimeException(e);
+        } catch (e: KeyStoreException) {
+            throw RuntimeException(e)
         }
 
 
-        var a = new KeyFile(keyPair.getPrivate().getEncoded(),
-                keyPair.getPrivate().getFormat(),
-                keyPair.getPublic().getEncoded(),
-                keyPair.getPublic().getFormat());
+        val a = KeyFile(
+            keyPair.private.encoded,
+            keyPair.private.format,
+            keyPair.public.encoded,
+            keyPair.public.format,
+            alias
+        )
 
-        Gson gson = new Gson();
-        String json = gson.toJson(a);
+        val gson = Gson()
+        val json = gson.toJson(a)
 
-        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
         if (dir != null) {
-            File jsonData = new File(dir.getPath(), alias + ".ppk");
+            val jsonData = File(dir.path, "$alias.ppk")
             try {
-                jsonData.createNewFile();
-            } catch (IOException e) {
-                return "can't create file";
+                jsonData.createNewFile()
+            } catch (e: IOException) {
+                return "can't create file"
             }
             if (jsonData.canWrite()) {
                 try {
-                    FileOutputStream writer = new FileOutputStream(jsonData);
-                    writer.write(json.getBytes());
-                    writer.close();
-                } catch (IOException e) {
-                    return "Failed : " + e.getLocalizedMessage();
+                    val writer = FileOutputStream(jsonData)
+                    writer.write(json.toByteArray())
+                    writer.close()
+                } catch (e: IOException) {
+                    return "Failed : " + e.localizedMessage
                 }
-            } else return "Need Permission to save File";
-        } else return "something went wrong";
-        return "done";
-        // return keyPairGenerator.generateKeyPair().getPublic();
+            } else return "Need Permission to save File"
+        } else return "something went wrong"
+        return "done"
 
+        // return keyPairGenerator.generateKeyPair().getPublic();
+    }
+
+    fun importKey(file: String, result: (String) -> Unit) {
+        val gson = Gson()
+
+        val data = gson.fromJson(file.reader(), KeyFile::class.java)
+
+        //private key
+        val privateBytes = PKCS8EncodedKeySpec(data.privateKeyEncoded)
+        val privateKeyFactory: KeyFactory = KeyFactory.getInstance("RSA")
+        val pvt: PrivateKey = privateKeyFactory.generatePrivate(privateBytes)
+
+        //public key
+        val ks = X509EncodedKeySpec(data.publicKeyEncoded)
+        val kf = KeyFactory.getInstance("RSA")
+        val pub = kf.generatePublic(ks)
+
+        val keyPair = KeyPair(pub, pvt)
+
+        val cert: X509Certificate
+        try {
+            cert = generateSelfSignedCertificate(keyPair)
+            keyStore?.setKeyEntry(
+                data.alias,
+                keyPair.private, null, arrayOf<Certificate>(cert)
+            )
+            result.invoke(data.alias)
+        } catch (e: Exception) {
+            result.invoke("error")
+        }
+    }
+
+    companion object {
+        @Throws(Exception::class)
+        fun generateSelfSignedCertificate(keyPair: KeyPair): X509Certificate {
+            Security.setProperty("crypto.policy", "unlimited")
+            val issuer = X500Name("CN= No PassWord For You")
+            val subject = X500Name("CN= PassWord Encryption")
+            val serialNumber = BigInteger.valueOf(System.currentTimeMillis())
+
+            val publicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.public.encoded)
+
+            val certBuilder: X509v3CertificateBuilder = JcaX509v3CertificateBuilder(
+                issuer,
+                serialNumber,
+                Date(System.currentTimeMillis()),
+                Date(System.currentTimeMillis() * 2),
+                subject,
+                publicKeyInfo
+            )
+
+            certBuilder.addExtension(
+                Extension.subjectKeyIdentifier,
+                false,
+                Extension.subjectKeyIdentifier
+            )
+            certBuilder.addExtension(
+                Extension.authorityKeyIdentifier,
+                false,
+                Extension.authorityKeyIdentifier
+            )
+            certBuilder.addExtension(Extension.basicConstraints, true, BasicConstraints(true))
+
+            val signer = JcaContentSignerBuilder("SHA256withRSA").build(keyPair.private)
+            val certHolder = certBuilder.build(signer)
+
+            return JcaX509CertificateConverter().getCertificate(certHolder)
+        }
     }
 }

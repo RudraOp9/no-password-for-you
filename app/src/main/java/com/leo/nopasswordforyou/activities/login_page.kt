@@ -16,125 +16,116 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package com.leo.nopasswordforyou.activities
 
-package com.leo.nopasswordforyou.activities;
-
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
-
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.auth.FirebaseAuth;
-import com.leo.nopasswordforyou.R;
-import com.leo.nopasswordforyou.databinding.ActivityLoginPageBinding;
-import com.leo.nopasswordforyou.viewmodel.Login_pageVM;
-
-import dagger.hilt.android.AndroidEntryPoint;
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuth
+import com.leo.nopasswordforyou.R
+import com.leo.nopasswordforyou.databinding.ActivityLoginPageBinding
+import com.leo.nopasswordforyou.viewmodel.Login_pageVM
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-public class login_page extends AppCompatActivity {
+class login_page : AppCompatActivity() {
+    var mAuth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+    private var binding: ActivityLoginPageBinding? = null
 
 
-    private ActivityLoginPageBinding binding;
     //  private FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (mAuth.getCurrentUser() != null) {
-            startActivity(new Intent(login_page.this, ShowPass.class));
-            finish();
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (mAuth.currentUser != null) {
+            startActivity(Intent(this@login_page, ShowPass::class.java))
+            finish()
         }
-        binding = ActivityLoginPageBinding.inflate(getLayoutInflater());
-        View view = binding.getRoot();
-        setContentView(view);
-        Login_pageVM vm = new ViewModelProvider(this).get(Login_pageVM.class);
-        vm.init(this, mAuth);
-        AlertDialog alertDialog;
-        alertDialog = new
-                MaterialAlertDialogBuilder(this).setView(R.layout.loading_dilogue_2).create();
-        alertDialog.setCanceledOnTouchOutside(false);
-        alertDialog.setCancelable(false);
+        binding = ActivityLoginPageBinding.inflate(
+            layoutInflater
+        )
+        val view: View = binding!!.root
+        setContentView(view)
+        val vm = ViewModelProvider(this).get(Login_pageVM::class.java)
+        vm.init(this, mAuth)
+        val alertDialog =
+            MaterialAlertDialogBuilder(this).setView(R.layout.loading_dilogue_2).create()
+        alertDialog.setCanceledOnTouchOutside(false)
+        alertDialog.setCancelable(false)
 
 
 
 
 
-        binding.doSignUp.setOnClickListener(v -> {
-            binding.loginLayout.setVisibility(View.GONE);
-            binding.signUpLayout.setVisibility(View.VISIBLE);
-        });
-        binding.doSignIn.setOnClickListener(v -> {
-            binding.loginLayout.setVisibility(View.VISIBLE);
-            binding.signUpLayout.setVisibility(View.GONE);
-        });
+        binding!!.doSignUp.setOnClickListener {
+            binding!!.loginLayout.visibility = View.GONE
+            binding!!.signUpLayout.visibility = View.VISIBLE
+        }
+        binding!!.doSignIn.setOnClickListener {
+            binding!!.loginLayout.visibility = View.VISIBLE
+            binding!!.signUpLayout.visibility = View.GONE
+        }
 
 
         // log in
 
         // log in
-
-        binding.logIn.setOnClickListener(v -> {
-            if (binding.emailTextLogIn.getText().toString().trim().isEmpty() || binding.passTextLogIn.getText().toString().trim().isEmpty()) {
-                Toast.makeText(this, "Fields are empty", Toast.LENGTH_SHORT).show();
+        binding!!.logIn.setOnClickListener {
+            if (binding!!.emailTextLogIn.text.toString().trim { it <= ' ' }
+                    .isEmpty() || binding!!.passTextLogIn.text.toString().trim { it <= ' ' }
+                    .isEmpty()) {
+                Toast.makeText(this, "Fields are empty", Toast.LENGTH_SHORT).show()
                 //  makeToast(this,"Fields are empty");
             } else {
-                if (mAuth.getCurrentUser() != null) mAuth.signOut();
-                alertDialog.show();
-                vm.loginAccount(binding.emailTextLogIn.getText().toString().trim(),
-                        binding.passTextLogIn.getText().toString().trim(),
-                        this, s -> {
-                            Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
-                            alertDialog.dismiss();
-                            if (mAuth.getCurrentUser() != null) {
-                                startActivity(new Intent(login_page.this, ShowPass.class));
-                                finish();
-                            }
-                            return null;
-                        });
+                if (mAuth.currentUser != null) mAuth.signOut()
+                alertDialog.show()
+                vm.loginAccount(
+                    binding!!.emailTextLogIn.text.toString().trim { it <= ' ' },
+                    binding!!.passTextLogIn.text.toString().trim { it <= ' ' },
+                    this
+                ) { s: String? ->
+                    Toast.makeText(this, s, Toast.LENGTH_SHORT).show()
+                    alertDialog.dismiss()
+                    if (mAuth.currentUser != null) {
+                        startActivity(Intent(this@login_page, ShowPass::class.java))
+                        finish()
+                    }
+                }
             }
-        });
+        }
+
 
         //sign up
-
-
-        binding.btnSignUp.setOnClickListener(v -> {
-            if (binding.emailTextSignUp.getText().toString().trim().isEmpty()
-                    || binding.passTextSignUp.getText().toString().trim().isEmpty()) {
-                Toast.makeText(this, "fields are empty !", Toast.LENGTH_SHORT).show();
-
+        binding!!.btnSignUp.setOnClickListener {
+            if (binding!!.emailTextSignUp.text.toString().trim { it <= ' ' }
+                    .isEmpty()
+                || binding!!.passTextSignUp.text.toString().trim { it <= ' ' }.isEmpty()
+            ) {
+                Toast.makeText(this, "fields are empty !", Toast.LENGTH_SHORT).show()
             } else {
-                if (mAuth.getCurrentUser() != null) {
-                    mAuth.signOut();
+                if (mAuth.currentUser != null) {
+                    mAuth.signOut()
                 }
-                alertDialog.show();
-                vm.createAccount(binding.emailTextSignUp.getText().toString(),
-                        binding.passTextSignUp.getText().toString(),
-                        this,
-                        (s) -> {
-                    alertDialog.dismiss();
-                            Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
-                            if (mAuth.getCurrentUser() != null) {
-                                startActivity(new Intent(login_page.this, ShowPass.class));
-                                finish();
-                            }
-                            return null;
+                alertDialog.show()
+                vm.createAccount(
+                    binding!!.emailTextSignUp.text.toString(),
+                    binding!!.passTextSignUp.text.toString(),
+                    this
+                ) { s: String? ->
+                    alertDialog.dismiss()
+                    Toast.makeText(this, s, Toast.LENGTH_SHORT).show()
+                    if (mAuth.currentUser != null) {
+                        startActivity(Intent(this@login_page, ShowPass::class.java))
+                        finish()
+                    }
 
-                        });
-
-
+                }
             }
-        });
+        }
     }
-
-
 }
