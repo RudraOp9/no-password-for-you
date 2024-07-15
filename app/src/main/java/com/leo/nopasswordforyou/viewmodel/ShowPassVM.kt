@@ -19,6 +19,11 @@
 
 package com.leo.nopasswordforyou.viewmodel
 
+import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.leo.nopasswordforyou.database.alias.AliasDao
@@ -27,6 +32,7 @@ import com.leo.nopasswordforyou.database.passes.PassesDao
 import com.leo.nopasswordforyou.database.passes.PassesEntity
 import com.leo.nopasswordforyou.database.passlist.PassListDao
 import com.leo.nopasswordforyou.database.passlist.PassListEntity
+import com.leo.nopasswordforyou.helper.PassAdapterData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,6 +45,35 @@ class ShowPassVM @Inject constructor(
     val aliasDao: AliasDao
 ) :
     ViewModel() {
+
+    var passwords: MutableState<List<PassAdapterData>> = mutableStateOf(emptyList())
+
+    var aliasStr: String = ""
+    var titleStr: String = ""
+    var uid: String = ""
+    var id = ""
+    var desc: String = ""
+    var passwordStr: String = ""
+
+
+    var aliases = ArrayList<String>()
+
+    init {
+        getAliases()
+        getPasses()
+    }
+
+    fun getAliases() {
+        viewModelScope.launch {
+            val alias = ArrayList<String>()
+            for (a in aliasDao.getAllUsers()) {
+                Log.d("tag", a.alias)
+                alias.add(a.alias)
+            }
+            aliases = alias
+        }
+    }
+
     fun getPassList(results: (ArrayList<PassListEntity>) -> Unit) {
         viewModelScope.launch {
             val k: ArrayList<PassListEntity> =
@@ -86,7 +121,37 @@ class ShowPassVM @Inject constructor(
         }
     }
 
-
+    fun getPasses(a: () -> Unit = {}) {
+        passwords.value = emptyList()
+        getPassList { it ->
+            passwords.value = passwords.value.toMutableList().apply {
+                for (list in it) {
+                    this.add(PassAdapterData(list.title, list.desc, list.passId, list.alias))
+                }
+                Log.d("TAG", "getPasses: updating gePasses")
+                a.invoke()
+            }
+        }
+        //todo implement this on login
+        /*dbTitles[source].addOnSuccessListener { queryDocumentSnapshots: QuerySnapshot? ->
+            if (queryDocumentSnapshots != null) {
+                for (a in queryDocumentSnapshots.documents) {
+                    passData.add(
+                        PassAdapterData(
+                            a["Title"] as String?,
+                            a["Desc"] as String?,
+                            a["id"] as String?
+                        )
+                    )
+                }
+                alertDialog1.dismiss()
+                passAdapter.notifyDataSetChanged()
+            }
+        }.addOnFailureListener { e: Exception ->
+            Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_SHORT).show()
+            alertDialog1.dismiss()
+        }*/
+    }
 
 
 }

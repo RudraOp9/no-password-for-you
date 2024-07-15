@@ -19,22 +19,24 @@
 
 package com.leo.nopasswordforyou.viewmodel
 
+import android.content.Context
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
+import android.widget.Toast
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.leo.nopasswordforyou.database.alias.AliasDao
 import com.leo.nopasswordforyou.database.passes.PassesDao
 import com.leo.nopasswordforyou.database.passes.PassesEntity
 import com.leo.nopasswordforyou.database.passlist.PassListDao
 import com.leo.nopasswordforyou.database.passlist.PassListEntity
 import com.leo.nopasswordforyou.helper.NewPass
+import com.leo.nopasswordforyou.secuirity.Security
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -53,13 +55,17 @@ class GeneratePassVM @Inject constructor(
     var selectedAlias = 0
 
 
-    var passWord: MutableLiveData<String> = MutableLiveData("")
-    var total: MutableLiveData<String> = MutableLiveData("")
+    var passWord: MutableState<String> = mutableStateOf("")
+    var total: MutableState<String> = mutableStateOf("")
+    var auth: FirebaseAuth = FirebaseAuth.getInstance()
+
 
     init {
         passWord.value = ""
         newPass = NewPass();
+        getAliases()
         genNewPass()
+
     }
 
     fun genNewPass() {
@@ -112,6 +118,92 @@ class GeneratePassVM @Inject constructor(
                 )
             )
 
+        }
+    }
+
+    fun isLoggedIn(): Boolean {
+        if (auth.currentUser == null) {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    fun encryptPass(context: Context, password: String, error: (String) -> Unit): String? {
+        val security = Security(context)
+        return security.encryptData(
+            password, aliases[selectedAlias], error
+        )
+    }
+
+
+    fun putPass(
+        encPass: String,
+        passTitle: String,
+        passDesc: String,
+        passUserId: String,
+        context: Context,
+        status: (code: Int) -> Unit
+    ) {
+        val alias = aliases[selectedAlias]
+        val db = FirebaseFirestore.getInstance()
+        if (auth.currentUser != null) {
+            val modify = System.currentTimeMillis()
+            val id = modify.toString()
+            val dbPass =
+                db.collection("PasswordManager")
+                    .document(auth.currentUser!!.uid)
+                    .collection("YourPass").document(id + passTitle)
+
+            val data2 =
+                PassListEntity(id + passTitle, passTitle, passDesc, alias, modify)
+
+            dbPass.set(data2).addOnSuccessListener {
+                val passData =
+                    PassesEntity(id + passTitle, passUserId, encPass, alias)
+
+                db.collection("Passwords")
+                    .document(auth.currentUser!!.uid)
+                    .collection("YourPass").document(id + passTitle).set(passData)
+                    .addOnSuccessListener {
+                        putPassList(
+                            passTitle,
+                            passDesc,
+                            id + passTitle,
+                            alias,
+                            modify
+                        )
+                        putPasses(
+                            id + passTitle,
+                            passUserId,
+                            encPass,
+                            alias
+                        )
+                        Toast.makeText(
+                            context,
+                            "Successfully completed",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        status.invoke(0)
+                    }.addOnFailureListener {
+                        status.invoke(1)
+                        Toast.makeText(
+                            context,
+                            "Something went wrong",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+            }.addOnFailureListener {
+                Toast.makeText(
+                    context,
+                    "Something went wrong",
+                    Toast.LENGTH_SHORT
+                ).show()
+                status.invoke(1)
+            }
+        } else {
+            Toast.makeText(context, "Login First", Toast.LENGTH_SHORT).show()
+            status.invoke(1)
         }
     }
 }

@@ -67,7 +67,7 @@ class Security(var context: Context) {
     val PADDING: String = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
     val KEYSTORE: String = "AndroidKeyStore"
     val TRANSFORMATION: String = String.format("%S/%S/%S", ALGORITHM, BLOCK_MODE, PADDING)
-    var cipher: Cipher? = null
+    lateinit var cipher: Cipher
     var keyStore: KeyStore? = null
 
 
@@ -125,9 +125,9 @@ class Security(var context: Context) {
         try {
             val key = getKey(Cipher.DECRYPT_MODE, alias, error)
             if (key != null) {
-                cipher!!.init(Cipher.DECRYPT_MODE, key)
+                cipher.init(Cipher.DECRYPT_MODE, key)
                 return String(
-                    cipher!!.doFinal(Base64.decode(pass, Base64.DEFAULT)),
+                    cipher.doFinal(Base64.decode(pass, Base64.DEFAULT)),
                     StandardCharsets.UTF_8
                 )
             } else return null
@@ -143,6 +143,8 @@ class Security(var context: Context) {
             error.invoke("Wrong Key or Incorrect Data , code 129")
         } catch (e: IllegalBlockSizeException) {
             error.invoke("Wrong Key or Incorrect Data , code 130")
+        } catch (e: Exception) {
+            error.invoke("Something went wrong")
         }
 
         return null

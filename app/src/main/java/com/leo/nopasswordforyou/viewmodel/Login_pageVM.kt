@@ -23,18 +23,14 @@ import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
 import android.util.Log
-import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.Task
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
-import com.leo.nopasswordforyou.R
 import com.leo.nopasswordforyou.database.passes.PassesDao
 import com.leo.nopasswordforyou.database.passes.PassesEntity
 import com.leo.nopasswordforyou.database.passlist.PassListDao
@@ -62,11 +58,9 @@ class Login_pageVM @Inject constructor(val passesDao: PassesDao, val passListDao
             ) { task: Task<AuthResult?> ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
-
-                    populateDb()
-                    result.invoke("Success")
-
-
+                    populateDb() {
+                        result.invoke("Success")
+                    }
                     //   loggedIn();
                     Log.d(ContentValues.TAG, "signInWithEmail:success")
                 }
@@ -79,7 +73,7 @@ class Login_pageVM @Inject constructor(val passesDao: PassesDao, val passListDao
             }
     }
 
-    private fun populateDb() {
+    private fun populateDb(result: () -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val auth: FirebaseAuth = FirebaseAuth.getInstance()
         val dbPassList: CollectionReference =
@@ -110,7 +104,9 @@ class Login_pageVM @Inject constructor(val passesDao: PassesDao, val passListDao
             }
             viewModelScope.launch {
                 passesDao.insertAllPass(data)
+                result.invoke()
             }
+
         }
 
 

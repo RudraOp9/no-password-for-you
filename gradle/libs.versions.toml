@@ -1,4 +1,7 @@
 [versions]
+appcompat = "1.7.0"
+constraintlayout = "2.1.4"
+coreKtx = "1.13.1"
 lifecycleRuntimeKtx = "2.8.0"
 
 bcpkixJdk18on = "1.76"
@@ -8,11 +11,19 @@ firebaseBom = "32.7.4"
 firebaseFirestore = "24.10.3"
 gson = "2.11.0"
 hiltAndroid = "2.51.1"
+material = "1.12.0"
 roomCompilerVersion = "2.6.1"
+runtimeAndroid = "1.6.7"
+material3Android = "1.2.1"
+uiToolingPreviewAndroid = "1.6.7"
+uiTooling = "1.6.7"
 
 
 
 [libraries]
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompilerVersion" }
@@ -32,6 +43,11 @@ firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "f
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
 
 bcpkix-jdk18on = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkixJdk18on" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+androidx-runtime-android = { group = "androidx.compose.runtime", name = "runtime-android", version.ref = "runtimeAndroid" }
+androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
+androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "uiToolingPreviewAndroid" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
 
 
 

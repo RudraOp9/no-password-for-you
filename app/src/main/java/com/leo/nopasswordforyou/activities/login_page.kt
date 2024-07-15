@@ -51,7 +51,7 @@ class login_page : AppCompatActivity() {
         )
         val view: View = binding!!.root
         setContentView(view)
-        val vm = ViewModelProvider(this).get(Login_pageVM::class.java)
+        val vm = ViewModelProvider(this)[Login_pageVM::class.java]
         vm.init(this, mAuth)
         val alertDialog =
             MaterialAlertDialogBuilder(this).setView(R.layout.loading_dilogue_2).create()

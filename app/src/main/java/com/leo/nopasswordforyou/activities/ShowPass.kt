@@ -24,6 +24,7 @@ import android.content.ClipboardManager
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.text.InputType
 import android.util.Log
 import android.view.View
@@ -32,9 +33,27 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.core.net.toFile
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -47,34 +66,28 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.leo.nopasswordforyou.R
+import com.leo.nopasswordforyou.components.CreateNewItem
 import com.leo.nopasswordforyou.database.passes.PassesEntity
 import com.leo.nopasswordforyou.database.passlist.PassListEntity
 import com.leo.nopasswordforyou.databinding.ActivityShowPassBinding
-import com.leo.nopasswordforyou.databinding.AddAliasBinding
-import com.leo.nopasswordforyou.databinding.CustomKeysetBinding
 import com.leo.nopasswordforyou.databinding.CustomSaveToCloudBinding
 import com.leo.nopasswordforyou.databinding.CustomShowPassBinding
-import com.leo.nopasswordforyou.databinding.LoadingDilogue2Binding
-import com.leo.nopasswordforyou.helper.ItemClickListner
-import com.leo.nopasswordforyou.helper.PassAdapter
-import com.leo.nopasswordforyou.helper.PassAdapterData
-import com.leo.nopasswordforyou.helper.checkExternalWritePer
 import com.leo.nopasswordforyou.secuirity.Security
 import com.leo.nopasswordforyou.viewmodel.ShowPassVM
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
-class ShowPass : AppCompatActivity(), ItemClickListner {
+class ShowPass : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var dbTitles: CollectionReference
     private lateinit var dbPass: DocumentReference
-    private lateinit var passData: ArrayList<PassAdapterData>
-    private lateinit var passAdapter: PassAdapter
-    private lateinit var alertDialog1: AlertDialog
+    /*    private lateinit var passData: ArrayList<PassAdapterData>*/
+    /*   private lateinit var passAdapter: PassAdapter*/
+    /*   private lateinit var alertDialog1: AlertDialog*/
 
-    private lateinit var keySettingNewKey: AlertDialog
+    /*    private lateinit var keySettingNewKey: AlertDialog*/
     private lateinit var vm: ShowPassVM
     private lateinit var binding: ActivityShowPassBinding
     private val requestPermissionLauncher =
@@ -102,24 +115,10 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
             }
         }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        binding = ActivityShowPassBinding.inflate(
-            layoutInflater
-        )
-        val view: View = binding.root
-        setContentView(view)
-
-        vm = ViewModelProvider(this).get(ShowPassVM::class.java)
-
-        val lDB = LoadingDilogue2Binding.inflate(layoutInflater)
-        alertDialog1 = alertDialogueBuilder(lDB.root)
-
-        lDB.loadingText.text = "Getting passwords"
-
-        passData = ArrayList()
 
         auth.addAuthStateListener(object : AuthStateListener {
             override fun onAuthStateChanged(firebaseAuth: FirebaseAuth) {
@@ -130,41 +129,184 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
             }
         })
 
-        if (auth.currentUser == null) {
-            startActivity(Intent(this, login_page::class.java))
-            Toast.makeText(this, "Login first", Toast.LENGTH_SHORT).show()
-            finish()
-            return
+        binding = ActivityShowPassBinding.inflate(
+            layoutInflater
+        )
+        val view: View = binding.root
+        setContentView(view)
+
+        vm = ViewModelProvider(this)[ShowPassVM::class.java]
+
+
+
+
+        binding.composeShowPass.setContent {
+            val context = LocalContext.current
+            var showUpdateItem by rememberSaveable {
+                mutableStateOf(false)
+            }
+            var updateItem by rememberSaveable {
+                mutableStateOf(false)
+            }
+            Column {
+                TopAppBar(title = { Text(text = "Passwords") })
+
+                Box(modifier = Modifier) {
+                    LazyColumn {
+                        items(vm.passwords.value.size) {
+                            Card(
+                                onClick = {
+                                    vm.getPass(vm.passwords.value[it].id) { pass ->
+                                        vm.titleStr = vm.passwords.value[it].title
+                                        vm.uid = pass.userId
+                                        vm.id = pass.passId
+                                        vm.desc = vm.passwords.value[it].description
+                                        vm.aliasStr = vm.passwords.value[it].alias
+                                        vm.passwordStr = pass.password
+                                        showUpdateItem = true
+                                    }
+
+
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp, vertical = 10.dp)
+                            ) {
+                                //Text(text = "this is an card.." , modifier = Modifier.padding(50.dp))
+                                Text(
+                                    text = vm.passwords.value[it].title,
+                                    fontSize = 17.sp,
+                                    fontFamily = FontFamily(
+                                        Font(
+                                            R.font.open_sans,
+                                            FontWeight.Normal
+                                        )
+                                    ),
+                                    modifier = Modifier.padding(
+                                        start = 10.dp,
+                                        top = 10.dp,
+                                        end = 10.dp
+                                    )
+                                )
+                                Text(
+                                    text = vm.passwords.value[it].description,
+                                    fontFamily = FontFamily(
+                                        Font(
+                                            R.font.open_sans,
+                                            FontWeight.Normal
+                                        )
+                                    ),
+                                    modifier = Modifier.padding(
+                                        start = 10.dp,
+                                        top = 5.dp,
+                                        end = 10.dp,
+                                        bottom = 10.dp
+                                    )
+                                )
+
+                            }
+                        }
+                    }
+                    if (showUpdateItem) {
+                        val security = Security(
+                            context
+                        )
+                        val decodedData = security.decryptData(vm.passwordStr, vm.aliasStr) {
+                            Snackbar.make(view, it, 3000).show()
+                        }
+                        if (decodedData != null) {
+                            com.leo.nopasswordforyou.components.ShowPass(
+                                id = vm.uid,
+                                password = decodedData,
+                                description = vm.desc,
+                                dismissDialog = { showUpdateItem = false },
+                                copy = {
+                                    val clipboard =
+                                        context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                                    val clip = ClipData.newPlainText("Copied Text", it)
+                                    clipboard.setPrimaryClip(clip)
+                                }
+
+                            ) {
+                                updateItem = true
+                            }
+                        }
+
+
+                        if (updateItem) {
+                            CreateNewItem(
+                                arrayKeys = null,
+                                alias0 = vm.aliasStr,
+                                title0 = vm.titleStr,
+                                uid0 = vm.uid,
+                                desc0 = vm.desc,
+                                password0 = vm.passwordStr,
+                                isUpdate = true,
+                                onExit = { updateItem = false }) { title, uid, desc, alias, _ ->
+                                if (title.isEmpty()) {
+                                    Snackbar.make(this as View, "Title is Required", 3000).show()
+                                } else {
+                                    Snackbar.make(view, "updating please wait ...", 4000).show()
+                                    vm.updatePassList(
+                                        PassListEntity(
+                                            passId = vm.id,
+                                            title = title,
+                                            desc = desc,
+                                            alias = alias,
+                                            lastModify = System.currentTimeMillis()
+                                        )
+                                    )
+                                    vm.updatePass(
+                                        PassesEntity(
+                                            passId = vm.id,
+                                            userId = uid,
+                                            password = vm.passwordStr,
+                                            alias = alias
+                                        )
+                                    )
+                                    vm.getPasses() {
+                                        updateItem = false
+                                        showUpdateItem = false
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
         }
 
-        db = FirebaseFirestore.getInstance()
+
+        /*  val lDB = LoadingDilogue2Binding.inflate(layoutInflater)
+          alertDialog1 = alertDialogueBuilder(lDB.root)
+
+          lDB.loadingText.text = "Getting passwords"*/
+
+        /*   passData = ArrayList()*/
+
+
+        /*db = FirebaseFirestore.getInstance()
         dbTitles = db.collection("PasswordManager").document(auth.currentUser!!.uid)
             .collection("YourPass")
         passAdapter = PassAdapter(passData, auth.currentUser!!.uid, db)
-        passAdapter.setClickListener(this)
-        binding.rvPasses.adapter = passAdapter
-        binding.rvPasses.layoutManager = LinearLayoutManager(this)
+        passAdapter.setClickListener(this)*/
+        /* binding.rvPasses.adapter = passAdapter
+         binding.rvPasses.layoutManager = LinearLayoutManager(this)*/
 
 
-        getPasses()
+        /*   binding.syncPass.setOnClickListener { getPasses() }*/
+
+        /*  binding.keySet.setOnClickListener {
+
+              val keyBind = CustomKeysetBinding.inflate(layoutInflater)
 
 
-        binding.syncPass.setOnClickListener { getPasses() }
-
-        binding.keySet.setOnClickListener {
-
-            val keyBind = CustomKeysetBinding.inflate(layoutInflater)
-
-
-            val keySetting: AlertDialog = alertDialogueBuilder(keyBind.root)
-            keyBind.addKey.setOnClickListener {
-                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-                intent.addCategory(Intent.CATEGORY_OPENABLE)
-                intent.type = "*/*"
-
-                filePickerLauncher.launch(arrayOf("*/*"))
-
-
+              val keySetting: AlertDialog = alertDialogueBuilder(keyBind.root)
+              keyBind.addKey.setOnClickListener {
+                 // filePickerLauncher.launch(arrayOf("*/
+        /*"))
             }
             keyBind.newKey.setOnClickListener {
                 val ksnBind = AddAliasBinding.inflate(layoutInflater)
@@ -186,7 +328,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
                                 this
                             )
                             val result = security.newKey(ksnBind.alias.text.toString())
-                            if (result.equals("done")) {
+                            if (result == "done") {
                                 ksnBind.addKey.text = "Exit"
                                 exit = true
                                 vm.setAlias(ksnBind.alias.text.toString())
@@ -198,43 +340,11 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
                     }
                 }
             }
-        }
-    }
-
-    private fun getPasses() {
-        if (!alertDialog1.isShowing) {
-            alertDialog1.show()
-        }
-        passData.clear()
-        vm.getPassList {
-            for (list in it) {
-                passData.add(PassAdapterData(list.title, list.desc, list.passId, list.alias))
-            }
-            alertDialog1.dismiss()
-            passAdapter.notifyDataSetChanged()
-        }
-        //todo implement this on login
-        /*dbTitles[source].addOnSuccessListener { queryDocumentSnapshots: QuerySnapshot? ->
-            if (queryDocumentSnapshots != null) {
-                for (a in queryDocumentSnapshots.documents) {
-                    passData.add(
-                        PassAdapterData(
-                            a["Title"] as String?,
-                            a["Desc"] as String?,
-                            a["id"] as String?
-                        )
-                    )
-                }
-                alertDialog1.dismiss()
-                passAdapter.notifyDataSetChanged()
-            }
-        }.addOnFailureListener { e: Exception ->
-            Toast.makeText(this@ShowPass, e.message, Toast.LENGTH_SHORT).show()
-            alertDialog1.dismiss()
         }*/
     }
 
-    override fun onClick(v: View, id: String, Title: String, Desc: String, alias: String) {
+
+    fun onClick(id: String, Title: String, Desc: String, alias: String) {
 //        Toast.makeText(this, id, Toast.LENGTH_SHORT).show();
         if (auth.currentUser == null) {
             startActivity(Intent(this, login_page::class.java))
@@ -356,7 +466,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
 
 
                                 alertDialog2.dismiss()
-                                getPasses()
+                                vm.getPasses()
                                 Toast.makeText(this, "updated", Toast.LENGTH_SHORT).show()
                             }
 
@@ -370,7 +480,7 @@ class ShowPass : AppCompatActivity(), ItemClickListner {
                             vm.deletePassList(id)
                             alertDialog1.dismiss()
                             dialog.dismiss()
-                            getPasses()
+                            vm.getPasses()
                         }
                     ad.create().show()
                 }
