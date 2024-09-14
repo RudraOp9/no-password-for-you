@@ -1,0 +1,32 @@
+{
+    "faq": [
+        {
+            "que": "What is No password for you ?",
+            "ans": "<strong>\"No Password for You\"</strong> is a password manager that <strong>automatically generates and securely stores strong, unique passwords</strong> for all your online accounts. It <strong>eliminates the need to remember complex passwords</strong> by handling the storage and retrieval process seamlessly."
+        },
+        {
+            "que": "What are Key and Alias ?",
+            "ans": "<strong>\"No Password for You\"</strong> employs the <strong>RSA encryption algorithm</strong> to safeguard your passwords. This robust method involves a <strong>pair of cryptographic keys:</strong> a <strong>public key</strong> and a <strong>private key</strong>.<br /><br /><strong>Public Key:</strong> The public key is used to <strong>verify the authenticity of the encryption</strong>. It confirms that the password was encrypted using the \"No Password for You\" application. This prevents unauthorized decryption.<br /><br /><strong>Private Key:</strong> As mentioned earlier, the private key is used to <strong>decrypt passwords</strong> that were encrypted using its corresponding public key. It's essential for accessing your stored passwords.<br /><br /><p data-sourcepos=\"3:1-3:191\"><strong>Aliases</strong> are <strong>custom names</strong> assigned to keys to make them easier to identify and manage. To prevent confusion or conflicts, ensure that each key has a <strong>unique alias</strong> when it's created.</p><p data-sourcepos=\"5:1-5:88\"><strong>For more info of RSA, public keys, and private keys, <a href=\"https://en.wikipedia.org/wiki/RSA_(cryptosystem)\" target=\"_blank\">please refer here</a></strong>"
+        },
+        {
+            "que": "How to Create Keys ?",
+            "ans": "<b>Creating Keys</b> : <br><br>1. Open <strong>\"No Password for You\"</strong> and navigate to the <strong>drawer</strong>.<br>2. Select <strong>\"Create New Key.\"</strong><br>Provide a<strong> unique name</strong> for your key.<br>Click \"Create.\"<br> </p><p> <strong>To import an existing key:</strong> <br><br>1. Choose <strong>\"Import Key.\"</strong><br> 2.Select the<b> .ppk </b>file containing your key."
+        },
+        {
+            "que": "How to export passwords ?",
+            "ans": "<strong>Exporting Passwords:</strong><br><br>1. Open<strong> \"No Password for You.\"</strong><br>2. Navigate to the <b>drawer</b><strong>.</strong><br>3. Select <strong>\"Export Passwords.\"</strong><br>4. Choose the passwords you want to export.<br> 5. Click <strong>\"Export.\"</strong> <p><strong>Important :</strong><br><br> Export only if you have the associated <b>.ppk </b>files.<br>Cloud passwords must be imported first.<br>Exported passwords are <b>encrypted </b>and saved in your device's <b>Downloads </b>folder.<br> <p><strong>Exported Files:</strong><br><br><strong>Mapping File:</strong> Contains information like titles, descriptions, and aliases.<br><strong>Pass File:</strong> Contains encrypted password and user ID data.<br><p><strong>Security Reminder:</strong><br><br><strong>Never share these files.</strong> They contain sensitive information.<br>Treat them with the same care as your<b> .ppk</b> files<strong>.</strong><br>To import <b>passwords </b>elsewhere, you'll need <b>both </b>files."
+        },
+        {
+            "que": "How to import passwords ?",
+            "ans": "<strong>Importing Passwords:</strong><br><br>1. Open <strong>\"No Password for You\"</strong><br>2. Navigate to the<strong> drawer.</strong><br>3. Select <strong>\"Import Passwords.\"</strong><p <strong>Choose your import method:</strong><br><br><strong>1. Import from Device:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;• Select the mapping and pass files saved on your device.<br><br><strong>Import from Cloud:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;• Log in to your cloud account to import passwords stored there.<p data-sourcepos=\"16:1-16:9\">Existing passwords on your device will not be overwritten."
+        },
+        {
+            "que": "What to do with .ppk file saved in Downloads ?",
+            "ans": "A <strong>.ppk</strong> file is a container format that stores <strong>keys</strong>. These keys are crucial for <strong>encrypting & decrypting</strong> passwords.</p><p> What to Do with Your .ppk File:<br><br>1. <strong>Secure Storage:</strong> Store your .ppk file in a safe and <strong>protected location</strong>. Consider using a <strong>password-protected</strong> pen drive.<br><br>2. Back Up: Create a backup of your .ppk file to prevent accidental loss.<br><br>3. Import into \"No Password for You\": Use the .ppk file to import your encrypted passwords into other \"No Password for You\" clients or devices. This allows you to access your passwords seamlessly across different platforms.<br><br>4. Delete Unused Keys: If you no longer need a specific .ppk file, delete it to reduce the risk of unauthorized access.<br><br>Remember: Losing your .ppk file can result in irreversible password loss. Always treat your .ppk files with the utmost care and security."
+        },
+        {
+            "que": "How password saving on cloud works ?",
+            "ans": "Passwords are encrypted using strong algorithms before being stored in the cloud. This makes them unreadable even if someone gains access to the server. \"No Password for You\" utilizes these general principles while potentially employing specific technologies (Firebase Firestore) for data storage.  You can consult the security rules on  <a href=\"https://github.com/RudraOp9/no-password-for-you\" target=\"_blank\">Github</a></strong> to learn more about the access control mechanisms<br><br>For further inquiries or assistance, consider joining the \"No Password for You\" Telegram <a href=\" https://tx.me/no_password_for_you\" target=\"_blank\">community</a></strong> or contacting them via <a href=\"mailto:work.Ieo@outlook.com\" target=\"_blank\">email</a></strong>.."
+        }
+    ]
+}
