@@ -1,20 +1,14 @@
 /*
  *  No password for you
- *  Created by RudraOp9
- *  Modified on 26/05/24, 2:54 pm
  *  Copyright (c) 2024 . All rights reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation,either version 3 of the License,or
+ * (at your option) any later version.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not,see <http://www.gnu.org/licenses/>.
  */
 
 package com.leo.nopasswordforyou.database.passlist
@@ -24,7 +18,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.leo.nopasswordforyou.database.passes.PassesEntity
 
 
 @Dao
@@ -40,12 +33,12 @@ interface PassListDao {
     suspend fun getPassList(): List<PassListEntity>
 
     @Query("SELECT * FROM passList WHERE passId = :keyId")
-    suspend fun getPassList(keyId: String): PassListEntity
+    suspend fun getPassList(keyId: String): PassListEntity?
 
-    @Update()
+    @Update
     suspend fun updatePassList(passListEntity: PassListEntity)
 
-    @Delete()
+    @Delete
     suspend fun deletePassList(passListEntity: PassListEntity)
 
     @Delete
@@ -55,7 +48,7 @@ interface PassListDao {
 
 
     suspend fun deletePassList(keyId: String) {
-        deletePassList(getPassList(keyId))
+        getPassList(keyId)?.let { deletePassList(it) }
     }
 
     suspend fun deleteAllPassList() {

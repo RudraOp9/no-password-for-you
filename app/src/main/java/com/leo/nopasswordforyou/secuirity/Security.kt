@@ -1,20 +1,14 @@
 /*
  *  No password for you
- *  Created by RudraOp9
- *  Modified on 22/05/24, 10:55 am
  *  Copyright (c) 2024 . All rights reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation,either version 3 of the License,or
+ * (at your option) any later version.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not,see <http://www.gnu.org/licenses/>.
  */
 package com.leo.nopasswordforyou.secuirity
 
@@ -25,6 +19,8 @@ import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import com.google.gson.Gson
+import com.google.gson.JsonIOException
+import com.google.gson.JsonSyntaxException
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x509.BasicConstraints
 import org.bouncycastle.asn1.x509.Extension
@@ -62,13 +58,14 @@ import javax.crypto.NoSuchPaddingException
 
 
 class Security(var context: Context) {
-    val ALGORITHM: String = "RSA"
-    val BLOCK_MODE: String = KeyProperties.BLOCK_MODE_ECB
-    val PADDING: String = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
-    val KEYSTORE: String = "AndroidKeyStore"
-    val TRANSFORMATION: String = String.format("%S/%S/%S", ALGORITHM, BLOCK_MODE, PADDING)
-    lateinit var cipher: Cipher
-    var keyStore: KeyStore? = null
+
+    private val ALGORITHM: String = "RSA"
+    private val BLOCK_MODE: String = KeyProperties.BLOCK_MODE_ECB
+    private val PADDING: String = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
+    private val KEYSTORE: String = "AndroidKeyStore"
+    private val TRANSFORMATION: String = String.format("%S/%S/%S", ALGORITHM, BLOCK_MODE, PADDING)
+    private lateinit var cipher: Cipher
+    private var keyStore: KeyStore? = null
 
 
     init {
@@ -101,8 +98,8 @@ class Security(var context: Context) {
         try {
             val key = getKey(Cipher.ENCRYPT_MODE, alias, error)
             if (key != null) {
-                cipher!!.init(Cipher.ENCRYPT_MODE, key)
-                return String(Base64.encode(cipher!!.doFinal(pass.toByteArray()), Base64.DEFAULT))
+                cipher.init(Cipher.ENCRYPT_MODE, key)
+                return String(Base64.encode(cipher.doFinal(pass.toByteArray()), Base64.DEFAULT))
             } else return null
         } catch (e: InvalidKeyException) {
             error.invoke("Incorrect Key Chosen ! code 39")
@@ -176,6 +173,21 @@ class Security(var context: Context) {
         }
     }
 
+    fun removeKey(alias: String, error: (String) -> Unit, success: () -> Unit) {
+        try {
+            if (keyStore?.containsAlias(alias) == true) {
+                keyStore?.deleteEntry(alias)
+                success.invoke()
+            } else {
+                success()
+                error("Key not found")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            error.invoke(e.localizedMessage ?: "Error while removing from device")
+        }
+    }
+
     fun newKey(alias: String): String {
         val keyPairGenerator: KeyPairGenerator
         try {
@@ -184,17 +196,9 @@ class Security(var context: Context) {
             return "Error" + e.localizedMessage
         }
 
-        /* KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec
-                .Builder(alias, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
-                .setEncryptionPaddings(PADDING)
-                .build();*/
         keyPairGenerator.initialize(2048)
         val keyPair = keyPairGenerator.genKeyPair()
-        /*
-        keyStore.setKeyEntry(alias+"public",keyPair.getPublic(),null,null);
-        Enumeration<String> a22 = keyStore.aliases();
-        while (a22.hasMoreElements()) Log.d("tagy", a22.nextElement());*/
+
         val cert: X509Certificate
         try {
             cert = generateSelfSignedCertificate(keyPair)
@@ -205,17 +209,8 @@ class Security(var context: Context) {
         } catch (e: Exception) {
             return "Error" + e.localizedMessage
         }
-        try {
-            val e = keyStore!!.aliases()
-            while (e.hasMoreElements()) {
-                Log.d("TAG", "newKey:" + e.nextElement())
-            }
-        } catch (e: KeyStoreException) {
-            throw RuntimeException(e)
-        }
 
-
-        val a = KeyFile(
+        val keyFile = KeyFile(
             keyPair.private.encoded,
             keyPair.private.format,
             keyPair.public.encoded,
@@ -224,7 +219,7 @@ class Security(var context: Context) {
         )
 
         val gson = Gson()
-        val json = gson.toJson(a)
+        val json = gson.toJson(keyFile)
 
         val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
@@ -250,34 +245,41 @@ class Security(var context: Context) {
         // return keyPairGenerator.generateKeyPair().getPublic();
     }
 
-    fun importKey(file: String, result: (String) -> Unit) {
+    fun importKey(file: String, result: (String, Int) -> Unit) {
         val gson = Gson()
 
-        val data = gson.fromJson(file.reader(), KeyFile::class.java)
-
-        //private key
-        val privateBytes = PKCS8EncodedKeySpec(data.privateKeyEncoded)
-        val privateKeyFactory: KeyFactory = KeyFactory.getInstance("RSA")
-        val pvt: PrivateKey = privateKeyFactory.generatePrivate(privateBytes)
-
-        //public key
-        val ks = X509EncodedKeySpec(data.publicKeyEncoded)
-        val kf = KeyFactory.getInstance("RSA")
-        val pub = kf.generatePublic(ks)
-
-        val keyPair = KeyPair(pub, pvt)
-
-        val cert: X509Certificate
         try {
-            cert = generateSelfSignedCertificate(keyPair)
+            val data = gson.fromJson(file.reader(), KeyFile::class.java)
+            //private key
+            val privateBytes = PKCS8EncodedKeySpec(data.privateKeyEncoded)
+            val privateKeyFactory: KeyFactory = KeyFactory.getInstance("RSA")
+            val pvt: PrivateKey = privateKeyFactory.generatePrivate(privateBytes)
+
+            //public key
+            val ks = X509EncodedKeySpec(data.publicKeyEncoded)
+            val kf = KeyFactory.getInstance("RSA")
+            val pub = kf.generatePublic(ks)
+
+            val keyPair = KeyPair(pub, pvt)
+
+            val cert: X509Certificate = generateSelfSignedCertificate(keyPair)
+
             keyStore?.setKeyEntry(
                 data.alias,
                 keyPair.private, null, arrayOf<Certificate>(cert)
             )
-            result.invoke(data.alias)
+            result.invoke(data.alias, 0)
+
+        } catch (e: JsonIOException) {
+            result.invoke("Error reading file", 1)
+        } catch (e: JsonSyntaxException) {
+            result.invoke("File corrupted", 1)
         } catch (e: Exception) {
-            result.invoke("error")
+            e.printStackTrace()
+            result.invoke("Error creating key", 1)
         }
+
+
     }
 
     companion object {

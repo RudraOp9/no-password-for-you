@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-keep class com.leo.nopasswordforyou.NoPassApp{*;}
+#data classes :
+-keep class com.leo.nopasswordforyou.database.alias.AliasEntity{ *; }
+-keep class com.leo.nopasswordforyou.database.passes.PassesEntity{ *; }
+-keep class com.leo.nopasswordforyou.database.passlist.PassListEntity{ *; }
+-keep class com.leo.nopasswordforyou.secuirity.KeyFile{ *; }

@@ -1,34 +1,38 @@
+<!--
+  ~  No password for you
+  ~  Copyright (c) 2024 . All rights reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation,either version 3 of the License,or
+  ~ (at your option) any later version.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not,see <http://www.gnu.org/licenses/>.
+  -->
+
 <resources>
     <string name="app_name">No password for you</string>
-    <string name="desc_spinner_dropdown" />
-    <string name="generating_password">Generating Password....</string>
-    <string name="regenerate_password">Regenerate password</string>
-    <string name="custom_settings">Custom Settings</string>
-    <string name="password_length">Password length</string>
-    <string name="capital_letters">Capital letters</string>
-    <string name="small_letters">small letters</string>
-    <string name="special_symbols">Special Symbols</string>
-    <string name="numbers">Numbers</string>
-    <string name="lol">this is an alpha release of \'No password for you\' This version is not the final version of this app and it is solely made for debugging purpose only . \n You should not Enter any sensitive info while using this application or to test the application , as your data can be used for debugging purpose. \n If you have some problem regarding your data , contact me on my E-mail. \n Your contribution makes the open source more better , if you find any bug,crash , new features, secuirity leaks , or any other problem, you can submit it on Github issues or on my E-mail. \n the report must include your device info, steps to reproduce the error, Expected results, Actual result , Visual proof if possible (screenshot , recording , etc.),priority of error. \nContact me : Rudrapratapsinhchauhan1@gmail.com \nGithub: https://github.com/RudraOp9/no-password-for-you</string>
-    <!--<string name="Faq_key">
-        Q: What is Key ?
-        \nA: key is used to protect your password.
+    <string name="generate">Generate</string>
+    <string name="vault">Vault</string>
+    <string name="unselect_all">Unselect all</string>
+    <string name="select_all">Select all</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">NO</string>
 
-        \n\nQ: why i have to create Key?
-        \nA: To ensure password security key should be created , key is not stored in cloud to protect from breaches.
-
-        \n\nQ: I am new to app ?
-        \nA: If you are new user create an new key , and keep the image or print the image in an paper.(delete image if printing)
-
-        \n\nQ: I am existing user and logged in on other device.
-        \nA: you should choose to add key , that you used on previous device
-
-        \n\nQ: I can't see my password !
-        \nA: You may added wrong key, try adding other keys if you had them.
-
-        \n\nQ: Who can see my password ?
-        \nA: nobody can see your password , except you .The password is end to end encrypted , and cannot be seen by anyone including \'No password for you\'
+    <string name="login">Login</string>
+    <!--vault menu-->
+    <string name="refresh">Refresh</string>
+    <string name="select">Select</string>
+    <string name="delete">Delete</string>
+    <!--dialog-->
+    <string name="delete_selected_dialog">Are you sure want to Delete selected Items ?</string>
+    <string name="delete_selected_cloud_dialog">Delete passwords saved In Cloud ?</string>
+    <!--Content description-->
+    <string name="click_to_open_drawer">open Drawer</string>
+    <string name="sort_vault">Sort current password vault</string>
+    <string name="vault_menu_option">Vault menu options</string>
 
 
-    </string>-->
 </resources>

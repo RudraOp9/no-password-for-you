@@ -1,20 +1,14 @@
 /*
  *  No password for you
- *  Created by RudraOp9
- *  Modified on 27/05/24, 11:06 am
  *  Copyright (c) 2024 . All rights reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation,either version 3 of the License,or
+ * (at your option) any later version.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not,see <http://www.gnu.org/licenses/>.
  */
 
 package com.leo.nopasswordforyou.database.passes
@@ -22,35 +16,35 @@ package com.leo.nopasswordforyou.database.passes
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.leo.nopasswordforyou.database.passlist.PassListEntity
 
 @Dao
 interface PassesDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertNewPass(passesEntity: PassesEntity)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAllPass(passesEntities: List<PassesEntity>)
 
     @Query("SELECT * FROM passes WHERE passId = :keyId")
-    suspend fun getPass(keyId: String): PassesEntity
+    suspend fun getPass(keyId: String): PassesEntity?
 
     @Query("SELECT * FROM passes")
     suspend fun getAllPass(): List<PassesEntity>
 
-    @Update()
+    @Update
     suspend fun updatePass(passesEntity: PassesEntity)
 
-    @Delete()
+    @Delete
     suspend fun deletePass(passesEntity: PassesEntity)
 
     @Delete
     suspend fun deleteAllPass(passesEntities: List<PassesEntity>)
 
     suspend fun deletePass(keyId: String) {
-        deletePass(getPass(keyId))
+        getPass(keyId)?.let { deletePass(it) }
     }
 
     suspend fun deleteAll() {

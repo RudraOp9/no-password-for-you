@@ -1,3 +1,16 @@
+/*
+ *  No password for you
+ *  Copyright (c) 2024 . All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation,either version 3 of the License,or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not,see <http://www.gnu.org/licenses/>.
+ */
+
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
@@ -26,16 +39,19 @@ android {
         applicationId = "com.leo.nopasswordforyou"
         minSdk = 23
         targetSdk = 34
-        versionCode = 1
-        versionName = "alpha-0.0.02"
+        versionCode = 2
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     buildTypes {
         release {
-            //  isMinifyEnabled = true
-            //  isShrinkResources = true
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -43,35 +59,71 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
 
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "1.8"
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.14"
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+}
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions.freeCompilerArgs.addAll(
+        "-P",
+        "plugin:androidx.compose.compiler.plugins.kotlin:strongSkipping=true",
+    )
 }
 
 dependencies {
 
+
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.runtime)
+    implementation(libs.androidx.foundation)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.biometric)
+    //  implementation(libs.androidx.activity.compose)
+
+    implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    implementation(libs.coil.compose)
+
+
+
+
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
 
-    implementation(libs.androidx.runtime.android)
     implementation(libs.androidx.material3.android)
-    implementation(libs.androidx.ui.tooling.preview.android)
+
+    implementation(libs.material)
 
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation(libs.kotlinx.coroutines.android)
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
@@ -93,13 +145,15 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     annotationProcessor(libs.androidx.room.compiler)
     debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
     kapt(libs.hilt.android.compiler)
 
-
-    implementation("com.airbnb.android:lottie:6.4.0")
-    implementation("com.github.idapgroup:Snowfall:0.9.5")
+    implementation(libs.snowfall)
 }
+
+
 

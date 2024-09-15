@@ -1,53 +1,55 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~  No password for you
+  ~  Copyright (c) 2024 . All rights reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation,either version 3 of the License,or
+  ~ (at your option) any later version.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not,see <http://www.gnu.org/licenses/>.
+  -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SET_BIOMETRIC_DIALOG_ADVANCED" />
+    <uses-permission
+        android:name="android.permission.USE_BIOMETRIC"
+        android:requiredFeature="false"
+        tools:targetApi="o" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-
-    <uses-feature android:name="android.hardware.strongbox_keystore" />
+    <uses-feature
+        android:name="android.hardware.strongbox_keystore"
+        android:required="true" />
 
     <application
-        android:name=".App"
+        android:name=".NoPassApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/img"
+        android:enableOnBackInvokedCallback="true"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/img"
+        android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.NoPasswordForYou"
-        tools:targetApi="31">
+        android:roundIcon="@mipmap/ic_launcher_round"
+        tools:targetApi="34">
         <activity
-            android:name=".activities.ShowPass"
-            android:exported="false">
-
-        </activity>
-        <activity
-            android:name=".activities.GeneratePass"
-            android:exported="false" />
-        <activity
-            android:name=".activities.login_page"
-            android:exported="false" />
-        <activity
-            android:name=".activities.MainActivity"
-            android:exported="true">
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.NoPasswordForYou"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

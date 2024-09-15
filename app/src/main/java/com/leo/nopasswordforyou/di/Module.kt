@@ -1,32 +1,24 @@
 /*
  *  No password for you
- *  Created by RudraOp9
- *  Modified on 27/05/24, 11:28 am
  *  Copyright (c) 2024 . All rights reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation,either version 3 of the License,or
+ * (at your option) any later version.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not,see <http://www.gnu.org/licenses/>.
  */
 
 package com.leo.nopasswordforyou.di
 
 import android.content.Context
 import androidx.room.Room
-import com.leo.nopasswordforyou.App
 import com.leo.nopasswordforyou.database.Database
 import com.leo.nopasswordforyou.database.alias.AliasDao
 import com.leo.nopasswordforyou.database.passes.PassesDao
 import com.leo.nopasswordforyou.database.passlist.PassListDao
-import com.leo.nopasswordforyou.database.passlist.PassListEntity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -64,21 +56,5 @@ object Module {
     fun provideAliasDao(database: Database): AliasDao {
         return database.aliasDao()
     }
-    /*  suspend fun addPassInList(
-          title: String,
-          description: String,
-          alias: String,
-          passId: String,
-          @ApplicationContext context: ApplicationContext
-      ) {
-          App.database.passListDao().insertNewPass(
-              PassListEntity(
-                  title = title,
-                  desc = description,
-                  alias = alias,
-                  passId = passId
-              )
-          )
 
-      }*/
 }
