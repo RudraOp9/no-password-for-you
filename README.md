@@ -6,7 +6,7 @@
 <p align="center">
 	<img src="https://img.shields.io/badge/Kotlin-1.9.24-6750a3" alt="Kotlin">
 	<a href="https://github.com/RudraOp9/no-password-for-you/releases"><img src="https://img.shields.io/badge/Download-Github_release-6750a3" alt="Download from github release"></a>
-	<img src="https://img.shields.io/badge/Telegram-Community-279bd5?logo=telegram" alt="Compose for android">
+	<a href="https://tx.me/no_password_for_you"><img src="https://img.shields.io/badge/Telegram-Community-279bd5?logo=telegram" alt="Telegram community"></a>
 </p>
 
 
@@ -20,6 +20,7 @@ A secure, easy-to-use **password manager** for Android. Built with **Jetpack Com
 - Go to firebase create new project and download `google-services.json` file & paste in `root/app` folder
 - Run
 #### or
+
 [<img src="https://img.shields.io/badge/Github_release-6750a3" alt="Download from github release">](https://github.com/RudraOp9/no-password-for-you/releases)
 
 
