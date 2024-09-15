@@ -1,87 +1,72 @@
 
-<p align = "center"><kbd> <img src="https://i.ibb.co/3fm3kt1/a694367e-4127-4a0b-82ec-b5ccfa336a7d.png" height = "200"  ></p>
-</kbd>
-<h1 align="center">No Password For You</h1>
-<p align="center">No password for you is a lightweight, fast and open-source custom secure password generator written in java</p>
+<p align = "center"> 
+	<img alt="No Password for you logo"src="https://github.com/RudraOp9/no-password-for-you/blob/main-compose/app/src/main/ic_launcher-playstore.png" height = "200"> 
+</p>
+
+<p align="center">
+	<img src="https://img.shields.io/badge/Kotlin-1.9.24-6750a3" alt="Kotlin">
+	<a href="https://github.com/RudraOp9/no-password-for-you/releases"><img src="https://img.shields.io/badge/Download-Github_release-6750a3" alt="Download from github release"></a>
+	<img src="https://img.shields.io/badge/Telegram-Community-279bd5?logo=telegram" alt="Compose for android">
+</p>
 
 
-<h1 align="center"<br /><a href='https://github.com/RudraOp9/no-password-for-you/blob/master/Samples.md'>Samples</h1>
+## No Password For You
+A secure, easy-to-use **password manager** for Android. Built with **Jetpack Compose** for a modern UI and Firebase Firestore for reliable data storage. Leverages **RSA** encryption for strong security.
 
----
+## Build
+### Build Locally 
+- Download & setup Android studio
+- Clone repo
+- Go to firebase create new project and download `google-services.json` file & paste in `root/app` folder
+- Run
+#### or
+[<img src="https://img.shields.io/badge/Github_release-6750a3" alt="Download from github release">](https://github.com/RudraOp9/no-password-for-you/releases)
 
-<h1>Database Rules </h1>
 
-    service cloud.firestore {
- 	 match /databases/{database}/documents {
+## Database Rules
 
-
-- Restrict access to all top-level collections
 - Allow access only to documents where the ID matches the user's UID
 - Allow access to subcollections and documents within the user's document
-	
-	   match /{collection}/{document}/{subcollection}/{subdocument} {
-   		 allow read : if request.auth != null && request.auth.uid  == document; // document = UID
-	 
-     	 allow update, delete: if request.auth != null && request.auth.uid == document;
-    	 allow create: if request.auth != null && request.auth.uid == document;
-	   }
-	  }
-	  }
-	   
+- Only allow Access to verified email users
+``` 
+service cloud.firestore {
+  match /databases/{database}/documents {
 
-   
----
+    match /{collection}/{document}/{subcollection}/{subdocument} {
 
-<h1>🔐 Overview</h1>
+      allow read : if request.auth != null && request.auth.uid  == document && request.auth.token.email_verified; // document = UID
+      allow update, delete: if request.auth != null && request.auth.uid == document && request.auth.token.email_verified;
+      allow create: if request.auth != null && request.auth.uid == document && request.auth.token.email_verified;
 
+    }
+  }
+}
+```
+## Features
+- Generate passwords
+- Save to cloud or device
+- Manage Vault
+- Import and Export Vault
+- Manage Keys
+- Dark & Light theme
 
-- Lightweight  4 Mb
-- No major permissions needed !
-- Very fast and secured !
-- Store to cloud
-- Secured by RSA algorithm
-- Generate custom highly configured passwords
-- interactive ui
-
----
-
-<h1>🛣️ Roadmap for No password for you</h1>
-
-- Allowing users to customize Password.✅✅✅
-- Add feature to secure password on cloud.✅✅❌ (Testing needed)
-- Material Design ✅❌❌
-- Add themes. ❌❌❌
-- Migrate to kotlin.❌❌❌
-- Adding security to app.✅✅❌
-- Upload it to Google Play Store. ❌❌❌
-- And most importantly, learn more about it ! ✅
-
----
-
-# Contributing
+## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-**Check out Roadmap to see this repository's future goals.**
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
 1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
+2. Create your Feature Branch
+3. Commit your Changes
+4. Push to the Branch
 5. Open a Pull Request
 
+Or open an issue !!
 
----
 
-<h1>💬 Contact Me</h1>
-<p>Email = rudrapratapsinhchauhan1@gmail.com </p>
 
-<p>Telegram = t.me/LeoOnRide </p>
+## Contact Me
+Email : work.ieo@outlook.com
 
----
+Telegram : [LeoOnRide](https://tx.me/LeoOnRide)
 
 # License
 
