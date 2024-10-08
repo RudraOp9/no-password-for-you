@@ -17,7 +17,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Handler
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -54,6 +53,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -73,6 +73,8 @@ import com.leo.nopasswordforyou.components.NavigationDrawerItem
 import com.leo.nopasswordforyou.components.Spacer
 import com.leo.nopasswordforyou.navigation.Screens
 import com.leo.nopasswordforyou.viewmodel.MainActivityVm
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -229,6 +231,7 @@ fun ShowPass(
 ) {
 
 
+    val coroutine = rememberCoroutineScope()
     ModalBottomSheet(
         onDismissRequest = {
             dismissDialog.invoke()
@@ -267,13 +270,11 @@ fun ShowPass(
                                     indication = null
                                 ) {
                                     copy.invoke(id)
-
-                                    val handler = Handler()
-                                    copyPassIcon = R.drawable.icon_done_24
-                                    handler.postDelayed(
-                                        { copyPassIcon = R.drawable.icon_copy_24 },
-                                        1500
-                                    )
+                                    coroutine.launch {
+                                        copyPassIcon = R.drawable.icon_done_24
+                                        delay(1500)
+                                        copyPassIcon = R.drawable.icon_copy_24
+                                    }
                                 }
                         )
 
@@ -326,14 +327,12 @@ fun ShowPass(
                                 indication = null
                             ) {
                                 copy.invoke(password)
+                                coroutine.launch {
+                                    copyPassIcon = R.drawable.icon_done_24
+                                    delay(1500)
+                                    copyPassIcon = R.drawable.icon_copy_24
+                                }
 
-                                val handler = Handler()
-
-                                copyPassIcon = R.drawable.icon_done_24
-                                handler.postDelayed(
-                                    { copyPassIcon = R.drawable.icon_copy_24 },
-                                    1500
-                                )
                             }
                     )
 
