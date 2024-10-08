@@ -21,6 +21,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicSecureTextField
@@ -41,20 +43,29 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.insert
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,15 +78,22 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.SecureFlagPolicy
 import com.leo.nopasswordforyou.R
 import com.leo.nopasswordforyou.components.DropDownSelector
 import com.leo.nopasswordforyou.components.Spacer
+import com.leo.nopasswordforyou.components.safeRequireOffset
 import com.leo.nopasswordforyou.database.alias.AliasEntity
 import com.leo.nopasswordforyou.viewmodel.MainActivityVm
 import kotlinx.coroutines.CoroutineScope
@@ -101,17 +119,29 @@ fun CreateNewItem(
     onDoneClick: (title: String, uid: String, desc: String, alias: String, keySelectedIndex: Int, pass: String, uploadToCloud: Boolean) -> Unit
 ) {
     val context = LocalContext.current
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var sheetOffset by rememberSaveable {
+        mutableFloatStateOf(0f)
+    }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true) {
+        it == SheetValue.Expanded
+    }
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     var uploadToCloud by rememberSaveable {
         mutableStateOf(false)
     }
+    val density = LocalDensity.current
+
 
     ModalBottomSheet(
         modifier = Modifier
             .fillMaxSize()
-            .imePadding(),
+            .imePadding()
+            .onGloballyPositioned {
+                sheetOffset = sheetState.safeRequireOffset() / with(density) { screenHeight.toPx() }
+            },
         sheetState = sheetState,
         shape = RoundedCornerShape(topEndPercent = 0, topStartPercent = 0),
+        dragHandle = null,
         onDismissRequest = {
             onExit.invoke()
         },
@@ -120,7 +150,11 @@ fun CreateNewItem(
             securePolicy = SecureFlagPolicy.Inherit
         )
     ) {
+
         val keyboardVisibility = WindowInsets.isImeVisible
+
+
+
         BackHandler {
             if (!keyboardVisibility) {
                 onExit.invoke()
@@ -129,6 +163,51 @@ fun CreateNewItem(
         }
 
 
+        LaunchedEffect(key1 = sheetOffset) {
+            if (sheetState.currentValue == SheetValue.Expanded && sheetOffset > 0.5f) {
+                onExit()
+            }
+        }
+
+
+        TopAppBar(
+            modifier = Modifier.padding(start = 20.dp, top = 10.dp),
+            title = {
+                Text(
+                    text = if (isUpdate) "Update info" else "Save password",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = typography.bodyLarge.fontSize,
+                    fontFamily = FontFamily.Serif
+                )
+            },
+            navigationIcon = {
+                Box(
+                    contentAlignment = Alignment.Center, modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .wrapContentSize()
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = remember {
+                                    MutableInteractionSource()
+                                },
+                                indication = null
+                            ) {
+                                onExit.invoke()
+                            },
+                        imageVector = Icons.Default.Close,
+                        contentDescription = ""
+                    )
+
+                    androidx.compose.animation.AnimatedVisibility(visible = sheetOffset != 0f && sheetState.currentValue == SheetValue.Expanded) {
+                        CircularProgressIndicator(progress = { sheetOffset * 2 })
+
+                    }
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors().copy(containerColor = Color.Transparent)
+        )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -137,9 +216,7 @@ fun CreateNewItem(
                 .padding(vertical = 20.dp, horizontal = 20.dp)
 
         ) {
-
             val focusManager = LocalFocusManager.current
-
             val (a, b, c) = FocusRequester.createRefs()
 
             var title by rememberSaveable { mutableStateOf(title0) }
@@ -341,7 +418,6 @@ fun CreateNewItem(
                     onClick = {
                         coroutine.launch(Dispatchers.Main) {
                             sheetState.hide()
-                            onExit()
 
                         }
                     },

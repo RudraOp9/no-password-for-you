@@ -18,8 +18,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -56,4 +58,13 @@ fun Spacer(modifier: Modifier = Modifier, height: Dp = 0.dp, width: Dp = 0.dp) {
             .width(width)
     )
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+fun SheetState.safeRequireOffset(): Float {
+    return try {
+        requireOffset()
+    } catch (e: Exception) {
+        0.0f
+    }
 }
