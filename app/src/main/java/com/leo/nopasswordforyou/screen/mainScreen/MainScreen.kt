@@ -407,6 +407,8 @@ fun MainScreen(
                                 GenPass(vm,
                                     generatePass = { capAlpha, smallAlpha, numbers, symbols ->
                                         vm.generateNewPass(capAlpha, smallAlpha, numbers, symbols)
+                                    }, setPass = { pass ->
+                                        vm.passWord = pass
                                     }) {
                                     if (aliasVm.aliases.value.isEmpty()) {
                                         coroutine.launch {

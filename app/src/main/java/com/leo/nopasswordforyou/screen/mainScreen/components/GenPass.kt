@@ -78,6 +78,7 @@ fun GenPass(
     coroutine: CoroutineScope = rememberCoroutineScope(),
     context: Context = LocalContext.current,
     generatePass: (capAlpha: Int, smallAlpha: Int, numbers: Int, symbols: Int) -> String,
+    setPass: (pass: String) -> Unit,
     onCreatePass: () -> Unit
 ) {
 
@@ -149,6 +150,7 @@ fun GenPass(
                 value = passWord,
                 onValueChange = {
                     passWord = it
+                    setPass(it)
                 },
                 supportingText = {
                     Text(
@@ -193,7 +195,6 @@ fun GenPass(
                                         (if (numbersVisi) numbers else 0),
                                         (if (symbolVisi) symbol else 0)
                                     )
-                                    //  vm.generateNewPass(alphaCap,smallCap,numbers,symbol)
 
                                 } else {
                                     generatePass(4, 5, 5, 2)
